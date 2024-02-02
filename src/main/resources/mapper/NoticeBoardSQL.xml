@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--<mapper namespace="com.multi.mini6.noticeboard.dao.NoticeBoardDAO">-->
+<mapper namespace="noticeboard">
+
+    <insert id="insertNotice" parameterType="NoticeBoardVO">
+        <![CDATA[
+        INSERT INTO notice (notc_title, notc_content, notc_createdAt, notc_updatedAt, notc_views, notice_uuid, notice_file_name, pinned)
+        VALUES (#{notc_title}, #{notc_content}, #{notc_createdAt}, #{notc_updatedAt}, #{notc_views}, #{notice_uuid}, #{notice_file_name}, #{pinned})
+        ]]>
+    </insert>
+
+    <update id="updateNotice" parameterType="NoticeBoardVO">
+        <![CDATA[
+        UPDATE notice
+        SET notc_title = #{notc_title},
+            notc_content = #{notc_content},
+            notc_updatedAt = #{notc_updatedAt},
+            notice_uuid = #{notice_uuid},
+            notice_file_name = #{notice_file_name},
+            pinned = #{pinned}
+        WHERE notc_id = #{notc_id}
+        ]]>
+    </update>
+
+    <delete id="deleteNotice" parameterType="int">
+        <![CDATA[
+        DELETE FROM notice WHERE notc_id = #{notc_id}
+        ]]>
+    </delete>
+
+    <update id="updateViewCountNotice" parameterType="int">
+        UPDATE notice
+        SET notc_views = notc_views + 1
+        WHERE notc_id = #{notc_id}
+    </update>
+
+    <select id="oneNotice" parameterType="int" resultType="NoticeBoardVO">
+        select * from notice
+        where notc_id = #{notc_id}
+    </select>
+
+    <select id="getNoticeBoardById" parameterType="int" resultType="NoticeBoardVO">
+        SELECT * FROM notice WHERE notc_id = #{notc_id}
+    </select>
+
+    <select id="listNotice" resultType="NoticeBoardVO">
+        <!--        select * from notice order by notc_id desc-->
+        SELECT *, CASE WHEN pinned = 1 THEN true ELSE false END AS pinned FROM notice ORDER BY notc_id DESC
+    </select>
+
+    <select id="getPinnedNotices" resultType="NoticeBoardVO">
+        SELECT *, CASE WHEN pinned = 1 THEN true ELSE false END AS pinned FROM notice WHERE pinned = 1 ORDER BY notc_id DESC
+    </select>
+
+    <select id="getRemainingNotices" resultType="NoticeBoardVO" parameterType="java.util.Map">
+        SELECT *, CASE WHEN pinned = 1 THEN true ELSE false END AS pinned FROM notice WHERE pinned = 0 ORDER BY notc_id DESC LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="selectNoticeAll" resultType="NoticeBoardVO">
+        select * from notice
+    </select>
+
+    <select id="getNoticeBoardCount" resultType="int">
+        select count(*) from notice
+    </select>
+
+    <!--    <select id="getPagedNoticeBoard" parameterType="NoticeBoardPageVO" resultType="NoticeBoardVO">-->
+    <!--        select * from (-->
+    <!--        select-->
+    <!--        row_number() over (order by notc_id desc) as notc_no,-->
+    <!--        notc_id,-->
+    <!--        notc_title,-->
+    <!--        notc_content,-->
+    <!--        notc_createdAt,-->
+    <!--        notc_updatedAt,-->
+    <!--        notc_views-->
+    <!--        from notice-->
+    <!--        ) row_notice-->
+    <!--        where row_notice.notc_no between #{start} and #{end}-->
+    <!--    </select>-->
+
+    <select id="getPagedNoticeBoard" parameterType="NoticeBoardPageVO" resultType="NoticeBoardVO">
+        <![CDATA[
+        SELECT *
+        FROM (
+                 SELECT
+                     row_number() over (order by notc_id desc) as notc_no,
+                         notc_id,
+                     notc_title,
+                     notc_content,
+                     notc_createdAt,
+                     notc_updatedAt,
+                     notc_views
+                                  pinned
+                 FROM notice
+             ) row_notice
+        WHERE row_notice.notc_no BETWEEN #{start} AND #{end}
+        ]]>
+    </select>
+
+
+    <!--    <select id="moveNoticeBoardPage" parameterType="int" resultType="NoticeBoardVO">-->
+    <!--        SELECT *-->
+    <!--        FROM (-->
+    <!--        SELECT-->
+    <!--        notc_id,-->
+    <!--        LEAD(notc_id, 1, 9999) OVER (ORDER BY notc_id) AS next,-->
+    <!--        LAG(notc_id, 1, 9999) OVER (ORDER BY notc_id) AS last,-->
+    <!--        notc_title,-->
+    <!--        LEAD(notc_title, 1, 'No next title') OVER (ORDER BY notc_id) AS nexttitle,-->
+    <!--        LAG(notc_title, 1, 'No previous title') OVER (ORDER BY notc_id) AS lasttitle-->
+    <!--        FROM notice-->
+    <!--        ORDER BY notc_id DESC-->
+    <!--        ) AS derived_table_alias-->
+    <!--        WHERE notc_id = #{notc_id}-->
+    <!--    </select>-->
+
+    <select id="moveNoticeBoardPage" parameterType="int" resultType="NoticeBoardVO">
+        SELECT
+            (SELECT MAX(notc_id) FROM notice WHERE notc_createdAt &lt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id})) AS last,
+        (SELECT MIN(notc_id) FROM notice WHERE notc_createdAt &gt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id})) AS next,
+             (SELECT notc_title FROM notice WHERE notc_id = (SELECT MAX(notc_id) FROM notice WHERE notc_createdAt &lt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id}))) AS lasttitle,
+             (SELECT notc_title FROM notice WHERE notc_id = (SELECT MIN(notc_id) FROM notice WHERE notc_createdAt &gt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id}))) AS nexttitle
+        WHERE
+            (SELECT MAX(notc_id) FROM notice WHERE notc_createdAt &lt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id})) IS NOT NULL
+           OR
+            (SELECT MIN(notc_id) FROM notice WHERE notc_createdAt &gt; (SELECT notc_createdAt FROM notice WHERE notc_id = #{notc_id})) IS NOT NULL
+    </select>
+
+
+    <select id="searchNoticeBoard" parameterType="NoticeBoardPageVO" resultType="NoticeBoardVO">
+        SELECT *
+        FROM notice
+        <where>
+            <if test="searchType == 'title'">
+                AND notc_title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'content'">
+                AND notc_content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'titleContent'">
+                AND (notc_title LIKE CONCAT('%', #{keyword}, '%') OR notc_content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY notc_id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="getNoticeBoardCountBySearch" parameterType="NoticeBoardPageVO" resultType="int">
+        SELECT COUNT(*)
+        FROM notice
+        <where>
+            <if test="searchType == 'title'">
+                AND notc_title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'content'">
+                AND notc_content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="searchType == 'titleContent'">
+                AND (notc_title LIKE CONCAT('%', #{keyword}, '%') OR notc_content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

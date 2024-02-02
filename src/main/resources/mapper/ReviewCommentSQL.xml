@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.multi.mini6.reviewboard.dao.ReviewCommentDAO">
+	<!-- 전체 페이지개수 계산할 때 전체 게시물 개수가 필요함 -->
+
+<!--	<insert id="review_comment_insert" useGeneratedKeys="true" keyProperty="cm_id" parameterType="reviewcommentVO">-->
+
+<!--		INSERT INTO review_comment  values-->
+<!--		(null, #{review_id}, #{member_id},#{book_id}, #{cm_content}, now(),now())-->
+<!--	</insert>-->
+	<insert id="review_comment_insert" useGeneratedKeys="true" keyProperty="cm_id" parameterType="reviewcommentVO">
+		INSERT INTO review_comment (review_id, member_id, cm_content, cm_createdAt, cm_modiefiedAt)
+		VALUES (#{review_id}, #{member_id}, #{cm_content}, now(), now())
+	</insert>
+
+
+
+<!--	<update id="review_comment_update" parameterType="reviewcommentVO">-->
+<!--		update review_comment set cm_content-->
+<!--		= #{cm_content} where cm_id-->
+<!--		= #{cm_id}-->
+<!--	</update>-->
+
+<!--	<delete id="review_comment_delete" parameterType="reviewcommentVO">-->
+<!--		delete from review_comment where cm_id = #{cm_id}-->
+<!--	</delete>-->
+	<update id="review_comment_update" parameterType="reviewcommentVO">
+		update review_comment set cm_content = #{cm_content}
+		where cm_id = #{cm_id} and member_id = #{member_id}
+	</update>
+
+	<delete id="review_comment_delete" parameterType="reviewcommentVO">
+		delete from review_comment
+		where cm_id = #{cm_id} and member_id = #{member_id}
+	</delete>
+
+
+	<select id="reviewCommentList" parameterType="int"  resultType="reviewcommentVO">
+		SELECT review_comment.*, member.nickname
+		FROM review_comment
+		left JOIN member ON review_comment.member_id = member.member_id
+		WHERE review_comment.review_id = #{review_id}
+	</select>
+
+</mapper>
+

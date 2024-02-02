@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.mini6.freeboard.dao.FreeBoardDAO">
+    <!--<mapper namespace="freeBoard">-->
+    <!-- 자유게시판 글 등록 -->
+    <insert id="freeBoardInsert" parameterType="freeboardVO">
+        insert into board (member_id, board_createdAt, board_updatedAt, board_views, board_title, board_content)
+        values (#{member_id}, now(), now(), #{board_views}, #{board_title}, #{board_content})
+        <selectKey keyProperty="board_id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+<!--자유게시판 글 등록 - 파일첨부 -->
+    <!--<insert id="freeBoardFileInsert"  parameterType="freeboardAttachVO">
+        insert into board_attach (board_id, board_uuid, board_file_name, board_file_type)
+        values(#{board_id}, #{board_uuid}, #{board_file_name}, #{board_file_type})
+    </insert>-->
+
+    <!-- -자유게시판 글 등록 - s3에 파일업로드 -->
+    <insert id="freeBoardS3Insert" parameterType="freeboardAttachVO">
+        insert into board_attach (board_id, board_file_name)
+        values(#{board_id}, #{board_file_name})
+    </insert>
+
+    <!-- -자유게시판 글 상세보기 - s3에 있는 파일정보가져오기 -->
+    <select id="freeBoardS3Find" parameterType="int" resultType="freeboardAttachVO">
+        select * from board_attach where board_id = #{board_id}
+    </select>
+
+    <!-- -자유게시판 글 상세보기 - s3에 있는 파일정보 삭제 -->
+    <select id="freeBoardS3InfoDelete" parameterType="int">
+        delete from board_attach where board_id = #{board_id}
+    </select>
+
+    <!--자유게시판 글 등록 - 첨부파일 삭제 -->
+    <!--<delete id="freeBoardFileDelete">
+        delete from board_attach where board_id = #{board_id}
+    </delete>-->
+
+    <!--자유게시판 글 등록 - 첨부파일 번호 찾기-->
+    <!--<select id="freeBoardFileID" resultType="freeboardAttachVO">
+        select * from board_attach where board_id = #{board_id}
+    </select>-->
+
+    <!--자유게시판 글 수정 - 첨부파일 삭제 -->
+    <!--<delete id="freeBoardFileChange">
+        delete from board_attach where board_uuid = #{board_uuid}
+    </delete>-->
+
+
+
+    <!--  자유게시판 글 목록 -->
+    <select id="freeBoardList" resultType="freeboardVO" parameterType="freeboardPageVO">
+        SELECT boardList2.*, member.nickname
+        FROM (
+        SELECT board.*, ROW_NUMBER() OVER (ORDER BY board.board_createdAt DESC) as free_board_no
+        FROM board
+        WHERE board.member_id IN (
+        SELECT member_id FROM member
+        <if test="searchType == 'title'  and keyword != ''">
+            WHERE board_title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'content' and keyword != ''">
+            WHERE board_content LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'writer' and keyword != ''">
+            WHERE member.nickname LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        )
+        ) as boardList2
+        JOIN member ON boardList2.member_id = member.member_id
+        WHERE boardList2.free_board_no BETWEEN #{start} AND #{end}
+    </select>
+
+    <!-- 자유게시판의 전체 게시물 개수 -->
+    <select id="freeBoardCount" resultType="int" parameterType="freeboardPageVO">
+        SELECT COUNT(*)
+        FROM board
+        JOIN member ON board.member_id = member.member_id
+        <if test="searchType == 'title' and keyword != null">
+            WHERE board_title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'content' and keyword != null">
+            WHERE board_content LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="searchType == 'writer' and keyword != null">
+            WHERE member.nickname LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <!--  자유게시판 글 상세보기 -->
+    <select id="freeBoardOne" parameterType="FreeBoardVO" resultType="freeboardVO">
+        select b.*, m.nickname from board b left join member m on b.member_id = m.member_id
+        where b.board_id = #{board_id}
+    </select>
+
+    <!-- 자유게시판 글 상세보기 - 조회수 증가 -->
+    <update id="freeBoardViewsCount" parameterType="FreeBoardVO">
+        update board set board_views = board_views + 1 where board_id = #{board_id} and member_id != #{member_id}
+    </update>
+
+    <!-- 자유게시판 글 상세보기 - 이전글 정보 조회 -->
+    <select id="getPreviousPost" parameterType="int" resultType="FreeBoardVO">
+        select * from board where board_id &lt; #{board_id} order by board_id desc limit 1
+        <!-- &lt; ==> "<" -->
+    </select>
+
+    <!-- 자유게시판 글 상세보기 - 다음글 정보 조회 -->
+    <select id="getNextPost" parameterType="int" resultType="FreeBoardVO">
+        select * from board where board_id > #{board_id} order by board_id asc limit 1
+    </select>
+
+    <!-- 자유게시판 글 삭제-->
+    <delete id="freeBoardDelete" parameterType="int">
+        delete from board where board_id = #{board_id}
+    </delete>
+
+    <!--  자유게시판 글 수정 -->
+    <update id="freeBoardUpdate" parameterType="freeboardVO">
+        update board set board_title = #{board_title}, board_content = #{board_content}, board_updatedAt = now() where
+        board_id = #{board_id}
+    </update>
+
+
+
+    <!--댓글저장-->
+    <insert id="freeBoardCommentInsert" parameterType="freeboardCommentVO">
+        insert into board_comment (board_id, cm_content, cm_createdAt, cm_modifiedAt, member_id, cm_class, cm_group)
+        select #{board_id}, #{cm_content}, now(), now(), #{member_id}, #{cm_class}, COALESCE(MAX(cm_group), 0) + 1
+        from board_comment where board_id = #{board_id}
+    </insert>
+
+    <!--댓글 리스트가져오기-->
+    <select id="freeBoardCommentList" parameterType="freeboardCommentVO" resultType="freeboardCommentVO">
+        SELECT board_comment.*, member.nickname
+        FROM board_comment
+        JOIN member ON board_comment.member_id = member.member_id
+        WHERE board_comment.board_id = #{board_id}
+    </select>
+
+    <!--댓글 수정-->
+    <update id="freeBoardCommentUpdate" parameterType="freeboardCommentVO">
+        update board_comment set cm_content = #{cm_content}, cm_modifiedAt = now() where bocm_id = #{bocm_id};
+    </update>
+
+    <!--댓글삭제-->
+    <delete id="freeBoardCommentDelete" parameterType="int">
+        delete from board_comment where bocm_id = #{bocm_id}
+    </delete>
+
+    <!--대댓글입력-->
+    <insert id="freeBoardCommentReply" parameterType="freeboardCommentVO">
+        insert into board_comment (board_id, cm_content, cm_createdAt, cm_modifiedAt, member_id, cm_class, cm_group)
+        values (#{board_id}, #{cm_content}, now(), now(), #{member_id}, 1, #{cm_group} )
+    </insert>
+
+
+</mapper>

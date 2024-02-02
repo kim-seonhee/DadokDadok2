@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+
+    <!-- 추가된 부분 -->
+    <bean id="customAccessDenied" class="com.multi.mini6.loginpage.security.CustomAccessDeniedHandler"/>
+    <bean id="customLoginSuccess" class="com.multi.mini6.loginpage.security.CustomLoginSuccessHandler"/>
+    <!-- 비밀번호 복호화 -->
+    <bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <bean id="customUserDetailsService" class="com.multi.mini6.loginpage.security.CustomUserDetailsService"/>
+
+    <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+        <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+        <property name="jdbcUrl" value="jdbc:log4jdbc:mysql://database-1.c9kgkoou0mai.ap-northeast-2.rds.amazonaws.com:3306/book_community"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="myoung1249!"></property>
+    </bean>
+
+    <!-- HikariDataSource Bean -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg ref="hikariConfig"/>
+    </bean>
+
+    <!-- 정적 리소스에 대한 보안 필터 해제 -->
+    <!--	<security:http pattern="loginpage/customLogin" security="none"/>  &lt;!&ndash;로그인 페이지 보안 해제 &ndash;&gt;-->
+    <!--	<security:http pattern="../accessError" security="none"/> &lt;!&ndash; 에러 페이지 보안 해제 &ndash;&gt;-->
+    <!--	<security:http pattern="../customLogout" security="none"/> &lt;!&ndash; 로그아웃 페이지 보안 해제 &ndash;&gt;-->
+    <!--	<security:http pattern="../resources/**" security="none"/> &lt;!&ndash; 리소스 폴더 보안 해제 &ndash;&gt;-->
+    <!--	<security:http pattern="../favicon.ico" security="none"/> &lt;!&ndash; 파비콘 보안 해제 &ndash;&gt;-->
+
+    <security:http auto-config="true" use-expressions="true">
+        <security:csrf disabled="true"/> <!-- csrf 토큰 사용 안함 -->
+
+        <security:form-login login-page="/loginpage/customLogin"
+                             login-processing-url="/perform_login"
+                             username-parameter="email"
+                             password-parameter="password"
+                             authentication-success-handler-ref="customLoginSuccess"/>
+
+        <security:access-denied-handler ref="customAccessDenied"/> <!-- 에러페이지 커스텀 -->
+        <security:logout logout-url="/loginpage/customLogout" invalidate-session="true"
+                         delete-cookies="remember-me, JSESSIONID"/> <!-- 로그아웃 페이지 커스텀 -->
+
+        <security:session-management invalid-session-url="/loginpage/customLogin">
+            <security:concurrency-control max-sessions="1" error-if-maximum-exceeded="false"/>
+        </security:session-management>
+        <!-- 기타 보안 설정 -->
+        <security:remember-me data-source-ref="dataSource" token-validity-seconds="604800" use-secure-cookie="false"/>
+<!--        <security:remember-me token-validity-seconds="60" use-secure-cookie="false"/>-->
+    </security:http>
+
+    <!--  secured method  -->
+
+
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="customUserDetailsService">
+            <security:password-encoder ref="bcryptPasswordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>

@@ -1,0 +1,42 @@
+.reviewboard { max-width: 1000px; margin: 0 auto; padding: 0 30px; }
+.reviewboard a { color: #121F37; text-decoration: none; }
+
+/*게시글 리스트  review_list3*/
+.reviewboard .insert_btn { color: #fafafa; }
+.reviewboard .rv_table tr th:nth-child(1), .reviewboard .rv_table tbody tr td:nth-child(1){ width: 20%; }
+.reviewboard .rv_table tr th:nth-child(2), .reviewboard .rv_table tbody tr td:nth-child(2) { width: 8%; }
+.reviewboard .rv_table tr th:nth-child(3), .reviewboard .rv_table tbody tr td:nth-child(3){ width: 27%; }
+.reviewboard .rv_table tr th:nth-child(4), .reviewboard .rv_table tbody tr td:nth-child(4){ width: 27%; }
+.reviewboard .rv_table tr th:nth-child(5), .reviewboard .rv_table tbody tr td:nth-child(5){ width: 10%; }
+.reviewboard .rv_table tr th:nth-child(6), .reviewboard .rv_table tbody tr td:nth-child(6){ width: 8%; }
+.reviewboard .rv_table tr { text-align: center;}
+.reviewboard .rv_table thead tr { line-height: 52px; padding: 0; border-top: 2px solid #999; background: #fafafa; font-weight: 600; }
+.reviewboard .rv_table thead tr th { border: none; }
+.reviewboard .rv_table tr td { padding: 0; }
+.reviewboard .rv_table tbody tr td:nth-child(3) a { font-weight: 900; }
+.reviewboard .rv_table tr td > div{ display: flex; height: 150px; justify-content: center; align-items: center; }
+.reviewboard .rv_table tr .t_img div { max-width: 100%; max-height: 180px; padding: 0;  }
+.reviewboard .rv_table tr .t_img div img{  max-width: 100%; max-height: 100%; }
+.reviewboard .rv_page { margin: 60px 0; }
+.reviewboard .rv_page .btn_box{  margin: 30px 0; }
+
+/* 게시글 상세보기review_one */
+.reviewboard .rv_btn { margin: 60px 0; }
+.reviewboard .rv_btn .update_btn{ margin-right: 10px; color: #fafafa; }
+.rv_inner .title-section h2 { margin: 30px 0; font-size: 24px; font-weight: 900; text-align: center; }
+.rv_inner .rv_title { display: flex; justify-content: space-between;}
+.rv_inner .rv_title p { margin-right: 10px;}
+.rv_inner .rv_title p:last-child { margin-right: 0;}
+.rv_inner .rv_content { display: flex; margin: 50px 0; }
+.rv_inner .rv_content .rv_file { width: 60%; padding: 50px 30px; background: #fafafa;}
+.rv_inner .rv_content .rv_file .img_file { width: 100%;  height: 100%; }
+.rv_inner .rv_content .rv_file .img_file span span { display: block; text-align: center; }
+.rv_inner .rv_content .rv_file .img_file img { display: block; width: 100%; max-width: 400px; max-height: 100%; height: 400px; margin: 0 auto;}
+.rv_inner .rv_content .text-right { width: 50%; padding: 20px; }
+.rv_inner .rv_cm { margin: 50px 0; }
+
+/* 게시글 작성 review_insert*/
+.rv_insert .form-group { margin-bottom: 30px; }
+.rv_insert .preview_close button { background: transparent; border: none; }
+.rv_insert .btn_box { display: flex; margin: 50px 0;  justify-content: center; }
+.rv_insert .btn_box a { margin-left: 10px; color: #fafafa; }
