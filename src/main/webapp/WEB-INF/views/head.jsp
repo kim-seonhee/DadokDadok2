@@ -30,14 +30,28 @@
   <!-- font awesome css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
 
-  <link href="${pageContext.request.contextPath}/resources/css/freeboard.css" rel="stylesheet">
-  <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
-<link href="${pageContext.request.contextPath}/resources/css/review.css" rel="stylesheet">
-<link href="${pageContext.request.contextPath}/resources/css/notice.css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/resources/css/dadokStyle.css" rel="stylesheet">
 
 <%--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">--%>
 <!-- Bootstrap JS (optional) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Vendor JS Files -->
+<link href="${pageContext.request.contextPath}/resources/assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/aos/aos.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/waypoints/noframework.waypoints.js"></script>
+<script src="${pageContext.request.contextPath}/resources/assets/vendor/php-email-form/validate.js"></script>
+
+<!-- Template Main JS File -->
+<script src="${pageContext.request.contextPath}/resources/assets/js/main.js"></script>
+
+<!-- jquery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 
   <!-- =======================================================
   * Template Name: Flattern

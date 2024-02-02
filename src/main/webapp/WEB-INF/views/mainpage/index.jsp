@@ -9,41 +9,6 @@
 
 <jsp:include page="/WEB-INF/views/head.jsp"/>
 
-
-<!-- Vendor JS Files -->
-<link href="../../../resources/assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-<script src="../../../resources/assets/vendor/aos/aos.js"></script>
-<script src="../../../resources/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="../../../resources/assets/vendor/glightbox/js/glightbox.min.js"></script>
-<script src="../../../resources/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-<script src="../../../resources/assets/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="../../../resources/assets/vendor/waypoints/noframework.waypoints.js"></script>
-<script src="../../../resources/assets/vendor/php-email-form/validate.js"></script>
-
-<!-- Template Main JS File -->
-<script src="../../../resources/assets/js/main.js"></script>
-<!-- jquery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-<style>
-    .logo-link {
-        display: flex;
-        align-items: center;
-        text-decoration: none; /* 링크 밑줄 제거 */
-    }
-
-    .logo-image {
-        max-width: 300px; /* 로고 이미지 크기 조정 */
-        height: auto; /* 이미지 높이 자동 조절 */
-    }
-
-    .logo-text {
-        font-size: 24px; /* 로고 텍스트 크기 */
-        font-weight: bold; /* 글씨 굵게 */
-        color: #333; /* 글씨 색상 */
-        /*margin-left: 5px; !* 이미지와 텍스트 간격 *!*/
-    }
-</style>
 <body>
 
 <!-- ======= Top Bar ======= -->
