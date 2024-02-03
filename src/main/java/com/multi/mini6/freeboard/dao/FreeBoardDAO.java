@@ -4,7 +4,10 @@ import com.multi.mini6.freeboard.vo.FreeBoardAttachVO;
 import com.multi.mini6.freeboard.vo.FreeBoardCommentVO;
 import com.multi.mini6.freeboard.vo.FreeBoardPageVO;
 import com.multi.mini6.freeboard.vo.FreeBoardVO;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +82,16 @@ public class FreeBoardDAO {
   }
 
   // 자유게시판 댓글 삭제
-  public int freeBoardCommentDelete(int  bocm_id) {
-    return sqlSession.update("freeBoardCommentDelete",bocm_id);
+  public int freeBoardCommentDelete(int  board_id, int cm_group) {
+    Map<String, Object> commentInfo = new HashMap<>();
+    commentInfo.put("board_id", board_id);
+    commentInfo.put("cm_group", cm_group);
+    return sqlSession.delete("freeBoardCommentDelete", commentInfo);
+  }
+
+  // 자유게시판 대댓글 삭제
+  public int freeBoardCommentChildDelete(int  bocm_id) {
+    return sqlSession.delete("freeBoardCommentChildDelete", bocm_id);
   }
 
   // 자유게시판 대댓글 입력

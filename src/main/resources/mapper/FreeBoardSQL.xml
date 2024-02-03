@@ -147,9 +147,15 @@
     </update>
 
     <!--댓글삭제-->
-    <delete id="freeBoardCommentDelete" parameterType="int">
+    <delete id="freeBoardCommentDelete" parameterType="map">
+        delete from board_comment where board_id = #{board_id} and cm_group = #{cm_group}
+    </delete>
+
+    <!--대댓글삭제-->
+    <delete id="freeBoardCommentChildDelete" parameterType="int">
         delete from board_comment where bocm_id = #{bocm_id}
     </delete>
+
 
     <!--대댓글입력-->
     <insert id="freeBoardCommentReply" parameterType="freeboardCommentVO">

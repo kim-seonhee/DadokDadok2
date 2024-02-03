@@ -121,8 +121,13 @@ public void commentInsert(FreeBoardCommentVO freeBoardCommentVO){
   }
 
   // 자유게시판 댓글삭제
-  public void commentDelete(int bocm_id){
-    freeBoardDAO.freeBoardCommentDelete(bocm_id);
+  public void commentDelete(int board_id, int cm_group){
+    freeBoardDAO.freeBoardCommentDelete(board_id, cm_group);
+  }
+
+  // 자유게시판 대댓글삭제
+  public void commentChildDelete(int bocm_id){
+    freeBoardDAO.freeBoardCommentChildDelete(bocm_id);
   }
 
   // 자유게시판 대댓글 입력
