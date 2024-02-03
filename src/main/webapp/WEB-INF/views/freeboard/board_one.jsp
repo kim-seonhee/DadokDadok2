@@ -9,7 +9,6 @@
 <html>
 <jsp:include page="/WEB-INF/views/head.jsp"/>
 
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
  <script type="text/javascript">
    $(document).ready(function(){
      // 원댓글 수정버튼 누르면 수정할 수 있는 textarea 보여지기
@@ -61,26 +60,57 @@
     }); //contentUpdate click end
 
     // 댓글 삭제
-    $(".deleteBtn").click(function(){
-        // 댓글 id
-        let delete_bocm_id = $(this).data('bocm_id');
-        console.log("delete_bocm_id + " + delete_bocm_id);
+    $(".cmDeleteBtn").click(function(){
+        // 게시글 id
+        let delete_board_id = $(this).data("board_id");
+        // 댓글 group
+        let delete_group = $(this).data("group");
 
          $.ajax({
               url: "/freeboard/comment_delete",
               type: "POST",
-              data: {bocm_id: delete_bocm_id},
+              data: {
+                board_id: delete_board_id,
+                cm_group: delete_group
+              },
              success: function(response) {
+                   alert("댓글이 성공적으로 삭제 되었습니다.");
                     location.reload(); // 새로고침
              },
              error: function(xhr, status, error) {
+                   alert("댓글 삭제 실패 했습니다.");
                    // 오류 처리
-                   console.error('댓글 삭제 실패했습니다.');
+                   console.error("error: " + error);
+                   console.error("status: " + status);
+                   console.error("xhr: " + xhr);
              }
          }); // ajax end
+    }); //cmDeleteBtn click end
 
-    }); //deleteBtn click end
+    // 대댓글 삭제
+    $(".childCmDeleteBtn").click(function(){
+        // 댓글 id
+        let delete_bocm_id = $(this).data("bocm_id");
 
+         $.ajax({
+              url: "/freeboard/comment_child_delete",
+              type: "POST",
+              data: {
+                bocm_id: delete_bocm_id
+              },
+             success: function(response) {
+                   alert("대댓글이 성공적으로 삭제 되었습니다.");
+                    location.reload(); // 새로고침
+             },
+             error: function(xhr, status, error) {
+                   alert("대댓글 삭제 실패 했습니다.");
+                   // 오류 처리
+                   console.error("error: " + error);
+                   console.error("status: " + status);
+                   console.error("xhr: " + xhr);
+             }
+         }); // ajax end
+    }); //childCmDeleteBtn click end
 
     // 댓글 버튼 누르면 대댓글 입력할 수 있는 textarea 보여지기
      $(".replyBtn").click(function(){
@@ -133,13 +163,17 @@
  }); // document end
 
 // 삭제버튼
- function boardDelete(board_id ) {
+ function boardDelete(board_id, cm_group ) {
      let boardId = board_id;
+     let cmGroup = cm_group;
       if(confirm("정말 삭제하시겠습니까?")) {
              $.ajax({
                  url: "/freeboard/board_delete",
                  type: "post",
-                 data: {board_id: boardId},
+                 data:{
+                     board_id: boardId,
+                     cm_group: cmGroup
+                 },
                  success: function(data) {
                      console.log("data : " + data);
                      if(data.success) {
@@ -293,7 +327,7 @@ function commentInsert(){
                                                       <sec:authentication property="principal.member.member_id" var="loggedInMemberId" />
                                                       <c:if test="${comment.member_id eq loggedInMemberId}">
                                                           <button type="button" class="parentUpdate">수정</button>
-                                                          <button type="button" class="deleteBtn" data-bocm_id="${comment.bocm_id}">삭제</button>
+                                                          <button type="button" class="cmDeleteBtn" data-board_id="${result.board_id}" data-group="${comment.cm_group}">삭제</button>
                                                       </c:if>
                                              </sec:authorize>
                                         </div>
@@ -340,7 +374,7 @@ function commentInsert(){
                                                     <c:if test="${comment.member_id eq loggedInMemberId}">
                                                         <div class="title_btn">
                                                             <button type="button" class="childUpdate">수정</button>
-                                                             <button type="button" class="deleteBtn" data-bocm_id="${comment.bocm_id}">삭제</button>
+                                                             <button type="button" class="childCmDeleteBtn" data-board_id="${result.board_id}"  data-group="${comment.cm_group}" data-bocm_id="${comment.bocm_id}">삭제</button>
                                                         </div>
                                                     </c:if>
                                             </sec:authorize>

@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -324,12 +325,24 @@ public class FreeBoardController {
     // 자유게시판 댓글삭제
     @PostMapping("/comment_delete")
     @ResponseBody
-    public ResponseEntity<String> commentDelete(@RequestParam("bocm_id") int bocm_id) {
+    public ResponseEntity<String> commentDelete(@RequestParam("board_id") int board_id, @RequestParam("cm_group") int cm_group) {
         try {
-            freeBoardService.commentDelete(bocm_id);
+            freeBoardService.commentDelete(board_id, cm_group);
             return new ResponseEntity<>("댓글 삭제 성공", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("댓글 삭제 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 자유게시판 대댓글삭제
+    @PostMapping("/comment_child_delete")
+    @ResponseBody
+    public ResponseEntity<String> commentDelete(@RequestParam("bocm_id") int bocm_id) {
+        try {
+            freeBoardService.commentChildDelete(bocm_id);
+            return new ResponseEntity<>("대댓글 삭제 성공", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("대댓글 삭제 실패", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -347,6 +360,7 @@ public class FreeBoardController {
 
 
     //자유게시판 게시글 삭제 + s3 파일 삭제
+    @Transactional
     @PostMapping("/board_delete")
     @ResponseBody
     public Map<String, Object> freeBoardDelete(int board_id) {
@@ -355,11 +369,11 @@ public class FreeBoardController {
 
         // 댓글 목록 가져오기
         Map<Integer, List<FreeBoardCommentVO>> commentListMap = freeBoardService.findList(board_id);
-        // 댓글 삭제
+        // 댓글 삭제 (댓글 목록이 있는 경우)
         for (Integer key : commentListMap.keySet()) {
             List<FreeBoardCommentVO> commentList = commentListMap.get(key);
             for (FreeBoardCommentVO comment : commentList) {
-                freeBoardService.commentDelete(comment.getBocm_id()); // 댓글 삭제
+                freeBoardService.commentDelete(comment.getBoard_id(), comment.getCm_group()); // 댓글 삭제
             }
         }
 
