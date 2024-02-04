@@ -15,6 +15,7 @@ import com.multi.mini6.loginpage.vo.CustomUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -244,7 +245,8 @@ public class FreeBoardController {
 
     // 자유게시판 게시글 수정
     @PostMapping("/board_update")
-    public String freeBoardUpdate(@RequestParam("board_id") int board_id,
+    @ResponseBody
+    public ResponseEntity<Integer>  freeBoardUpdate(@RequestParam("board_id") int board_id,
                                   @RequestParam("board_title") String board_title,
                                   @RequestParam("board_content") String board_content,
                                   @RequestParam(value = "file", required = false) MultipartFile[] files, FreeBoardAttachVO freeBoardAttachVO) {
@@ -296,8 +298,8 @@ public class FreeBoardController {
                 }
             }
         }
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(freeBoardVO.getBoard_id());
 
-        return "redirect:/freeboard/board_list";
     }
 
 

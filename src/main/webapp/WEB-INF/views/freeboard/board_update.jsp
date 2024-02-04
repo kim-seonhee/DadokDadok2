@@ -8,7 +8,6 @@
 <!DOCTYPE html>
 <html>
 <jsp:include page="/WEB-INF/views/head.jsp"/>
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <script type="text/javascript">
     $(document).ready(function(){
          // 확장자 확인
@@ -94,12 +93,14 @@
                   $(this).closest('.preview_box').remove();
             }); //file_preview onclick(파일삭제버튼) end
 
-  }); //script
-          $("button[type='submit']").on("click", function(e){
+
+          $("#updateBtn").on("click", function(e){
                 // 이벤트 버블링 막기
                 e.preventDefault();
 
-                // 제목, 내용 비어있는지 확인
+                let id = ${freeBoardVO.board_id};
+
+                // 제목, 내용 비어 있는지 확인
                 let title = $("input[name='board_title']").val().trim();
                 let content = $("textarea[name='board_content']").val().trim();
                 if(title == "" || content == ""){
@@ -122,7 +123,7 @@
                             formData.append('file' , file); // 각 파일을 별도로 추가
                         }
                     }
-
+                formData.append('board_id', $("input[name='board_id']").val());
                 formData.append('board_title', $("input[name='board_title']").val()); // 제목 추가
                 formData.append('board_content', $("textarea[name='board_content']").val()); // 내용 추가
                 formData.append('member_id', $("input[name='member_id']").val());
@@ -133,16 +134,16 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    dataType: "json",
                     success: function(data) {
-                        window.location.href = "/freeboard/board_list";
-                    },
+                       alert("게시글 수정이 완료 되었습니다.");
+                       window.location.href = "/freeboard/board_one?board_id=" + data;
+                        },
                     error: function(jqXHR, textStatus, errorThrown) {
-                       alert("게시글 수정 중 오류가 발생하였습니다.");
-                    },
+                       alert("게시글 수정 중 오류가 발생 하였습니다.");
+                    }
                 });
             }); // submit btn onclick end
-
+  }); //script
 
 
 
@@ -203,7 +204,7 @@
                            </div>
                     </div>
                     <div class="in_btn">
-                          <button type="submit">수정완료</button>
+                          <button type="submit" id="updateBtn">수정완료</button>
                           <a href="${pageContext.request.contextPath}/freeboard/board_list">취소하기</a>
                     </div>
               </form>
