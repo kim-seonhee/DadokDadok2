@@ -212,9 +212,13 @@ public void commentInsert(FreeBoardCommentVO freeBoardCommentVO){
       s3Client.deleteObject(new DeleteObjectRequest(bucketName, s3Filename));
     }
 
-
+  // 자유게시판 목록에서 제목 옆에 댓글 개수 표시
   public int getCommentCountByBoardId(int board_id) {
     return freeBoardDAO.getCommentCountByBoardId(board_id);
+  }
+
+  public List<Object> boardAttachCheck(int board_id) {
+    return freeBoardDAO.boardAttachCheck(board_id);
   }
 }
 

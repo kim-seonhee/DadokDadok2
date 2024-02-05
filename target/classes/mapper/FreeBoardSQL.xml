@@ -156,15 +156,20 @@
         delete from board_comment where bocm_id = #{bocm_id}
     </delete>
 
-
     <!--대댓글입력-->
     <insert id="freeBoardCommentReply" parameterType="freeboardCommentVO">
         insert into board_comment (board_id, cm_content, cm_createdAt, cm_modifiedAt, member_id, cm_class, cm_group)
         values (#{board_id}, #{cm_content}, now(), now(), #{member_id}, 1, #{cm_group} )
     </insert>
 
+    <!--목록에서 제목 옆에 댓글 개수 표시-->
     <select id="getCommentCountByBoardId" parameterType="int" resultType="int">
         select count(board_id) from board_comment where board_id = #{board_id}
+    </select>
+
+    <!--목록에서 제목 옆에 첨부파일 여부 확인-->
+    <select id="boardAttachCheck" resultType="int">
+        select board_id from board_attach where board_id = #{board_id};
     </select>
 
 </mapper>

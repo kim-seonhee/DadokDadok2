@@ -135,11 +135,19 @@ public class FreeBoardController {
 
         // 게시글 제목 옆에 댓글 개수 표시
         Map<Integer, Integer> commentCountMap = new HashMap<>();
-
+        // 게시글 제목 옆에 첨부파일 여부 확인
+        List<Integer> attachList = new ArrayList<>();
         for (FreeBoardVO board : boardList) {
+            // 댓글 개수
             int countComment = freeBoardService.getCommentCountByBoardId(board.getBoard_id());
             commentCountMap.put(board.getBoard_id(), countComment);
+            // 첨부파일 여부
+            if (!freeBoardService.boardAttachCheck(board.getBoard_id()).isEmpty()) {
+                attachList.add(board.getBoard_id());
+            }
+            log.info("attachList {}", attachList );
         }
+
 
         model.addAttribute("boardList", boardList); // 페이지에서 보여줄 글 목록
         model.addAttribute("totalPage", totalPage); // 전체 페이지 수
@@ -148,6 +156,7 @@ public class FreeBoardController {
         model.addAttribute("searchType", searchType); // 검색 타입
         model.addAttribute("keyword", keyword); // 검색어
         model.addAttribute("countComment", commentCountMap); // 댓글 개수
+        model.addAttribute("attachList", attachList); // 첨부파일 여부
 
         return "/freeboard/board_list";
     }

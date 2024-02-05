@@ -75,10 +75,16 @@
                                       <sec:authorize access="isAuthenticated()"><%--로그인한 사람만 자세히보기할 수 있음 --%>
                                           <a href="/freeboard/board_one?board_id=${board.board_id}&page=${page}&searchType=${searchType}&keyword=${keyword}">${board.board_title}</a>
                                           <div class="bl_cm">[${countComment[board.board_id]}]</div>
+                                          <c:if test="${attachList.contains(board.board_id)}">
+                                             <i class="far fa-file-alt bl_file"></i>
+                                          </c:if>
                                       </sec:authorize>
                                       <sec:authorize access="isAnonymous()"><%-- 로그인하지 않은 사용자는 로그인 페이지로 이동--%>
                                           <a href="/loginpage/customLogin">${board.board_title}</a>
                                           <div class="bl_cm">[${countComment[board.board_id]}]</div>
+                                          <c:if test="${attachList.contains(board.board_id)}">
+                                              <i class="far fa-file-alt bl_file"></i>
+                                          </c:if>
                                       </sec:authorize>
                                   </div>
                               </td>
