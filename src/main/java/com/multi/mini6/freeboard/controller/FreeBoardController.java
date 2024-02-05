@@ -126,19 +126,37 @@ public class FreeBoardController {
         // 시작, 마지막 페이지 수 가져오기
         freeboardPageVO.setStartEnd();
         // 현재페이지에서 보여줄 글 목록
-        List<FreeBoardVO> list = freeBoardService.freeBoardList(freeboardPageVO);
+        List<FreeBoardVO> boardList = freeBoardService.freeBoardList(freeboardPageVO);
 
         // totalPage = (전체 게시물 수 + 한 페이지에서 보여줄 게시글 수 - 1)  / 한 페이지에서 보여줄 게시글 수
         // 정수 나눗셈 결과: 정수 반환, 소수부분 버림
         //   --> count / pageSize 결과값이 나머지가 있을 경우를 대비해  pageSize  - 1 해줌
         int totalPage = (count + pageSize - 1) / pageSize;
 
-        model.addAttribute("boardList", list); // 페이지에서 보여줄 글 목록
+        // 게시글 제목 옆에 댓글 개수 표시
+        Map<Integer, Integer> commentCountMap = new HashMap<>();
+        // 게시글 제목 옆에 첨부파일 여부 확인
+        List<Integer> attachList = new ArrayList<>();
+        for (FreeBoardVO board : boardList) {
+            // 댓글 개수
+            int countComment = freeBoardService.getCommentCountByBoardId(board.getBoard_id());
+            commentCountMap.put(board.getBoard_id(), countComment);
+            // 첨부파일 여부
+            if (!freeBoardService.boardAttachCheck(board.getBoard_id()).isEmpty()) {
+                attachList.add(board.getBoard_id());
+            }
+            log.info("attachList {}", attachList );
+        }
+
+
+        model.addAttribute("boardList", boardList); // 페이지에서 보여줄 글 목록
         model.addAttribute("totalPage", totalPage); // 전체 페이지 수
         model.addAttribute("page", page); // 현재 페이지 번호
         model.addAttribute("count", count); // 전체 게시물 수
         model.addAttribute("searchType", searchType); // 검색 타입
         model.addAttribute("keyword", keyword); // 검색어
+        model.addAttribute("countComment", commentCountMap); // 댓글 개수
+        model.addAttribute("attachList", attachList); // 첨부파일 여부
 
         return "/freeboard/board_list";
     }

@@ -114,4 +114,14 @@ public class FreeBoardDAO {
   public int deleteFreeBoardFileInfo(int board_id) {
     return sqlSession.delete("freeBoardS3InfoDelete", board_id);
   }
+
+  // 자유게시판 목록에서 제목 옆에 댓글 개수 표시
+  public int getCommentCountByBoardId(int board_id) {
+    return sqlSession.selectOne("getCommentCountByBoardId", board_id);
+  }
+
+  //자유게시판 목록에서 제목 옆에 첨부파일 여부 확인
+  public List<Object> boardAttachCheck(int board_id) {
+    return sqlSession.selectList("boardAttachCheck", board_id);
+  }
 }

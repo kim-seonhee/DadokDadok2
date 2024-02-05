@@ -118,6 +118,10 @@ ul, ol {list-style: none;}
   .b_list table tr > td:nth-child(3) { width: 100px; }
   .b_list table tr > td:nth-child(4) { width: 80px; }
   .b_list table tr > td:nth-child(5) { width: 100px; }
+  .b_list table .bl_title a { color: #0a58ca; }
+  .b_list table .bl_title { display:flex; justify-content: center; align-items: center; }
+  .b_list table .bl_title .bl_cm { margin: 0 6px; color: #999; }
+  .b_list table .bl_title .bl_file { color: #999; }
 
   .b_paging { margin: 50px 0; }
   .b_paging ul { display: flex; justify-content: center; }
