@@ -213,9 +213,9 @@ public void commentInsert(FreeBoardCommentVO freeBoardCommentVO){
     }
 
 
-
-
-
+  public int getCommentCountByBoardId(int board_id) {
+    return freeBoardDAO.getCommentCountByBoardId(board_id);
+  }
 }
 
 

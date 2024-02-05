@@ -163,5 +163,8 @@
         values (#{board_id}, #{cm_content}, now(), now(), #{member_id}, 1, #{cm_group} )
     </insert>
 
+    <select id="getCommentCountByBoardId" parameterType="int" resultType="int">
+        select count(board_id) from board_comment where board_id = #{board_id}
+    </select>
 
 </mapper>

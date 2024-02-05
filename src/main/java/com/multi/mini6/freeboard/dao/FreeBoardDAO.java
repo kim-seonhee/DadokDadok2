@@ -114,4 +114,8 @@ public class FreeBoardDAO {
   public int deleteFreeBoardFileInfo(int board_id) {
     return sqlSession.delete("freeBoardS3InfoDelete", board_id);
   }
+
+  public int getCommentCountByBoardId(int board_id) {
+    return sqlSession.selectOne("getCommentCountByBoardId", board_id);
+  }
 }
