@@ -343,7 +343,10 @@ function commentInsert(){
             </div>
                </div>
                <div class="comment">
-                    <p>댓글</p>
+                    <div class="cm_info">
+                        <p>댓글</p>
+                        <div>${commentCount}</div>
+                    </div>
                     <c:forEach items="${groupedComments}" var="entry">
                     <div class="c_group">
                          <c:forEach items="${entry.value}" var="comment">

@@ -210,7 +210,7 @@ public void commentInsert(FreeBoardCommentVO freeBoardCommentVO){
     s3Client.deleteObject(new DeleteObjectRequest(bucketName, s3Filename));
   }
 
-  // 자유게시판 목록에서 제목 옆에 댓글 개수 표시
+  // 자유게시판 게시글의 댓글 개수 구하기
   public int getCommentCountByBoardId(int board_id) {
     return freeBoardDAO.getCommentCountByBoardId(board_id);
   }

@@ -231,6 +231,9 @@ public class FreeBoardController {
         // 해당 게시글의 댓글 목록 가져오기
         Map<Integer, List<FreeBoardCommentVO>> groupedComments = freeBoardService.findList(freeBoardVO.getBoard_id());
 
+        // 해당 게시글의 댓글 개수 가져오기
+        int commentCount = freeBoardService.getCommentCountByBoardId(freeBoardVO.getBoard_id());
+
         model.addAttribute("result", result);
         model.addAttribute("previousPost", previousPost);
         model.addAttribute("nextPost", nextPost);
@@ -241,6 +244,7 @@ public class FreeBoardController {
         model.addAttribute("s3FileUrlList", s3FileUrlList); // 파일첨부 url
         model.addAttribute("s3FileNames", s3FileNames); // 파일 이름
         model.addAttribute("s3FileTypes", s3FileTypes); // 파일 타입
+        model.addAttribute("commentCount", commentCount); // 댓글 개수
 
         return "/freeboard/board_one";
     }
