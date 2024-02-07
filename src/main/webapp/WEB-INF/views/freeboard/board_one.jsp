@@ -160,6 +160,41 @@
                   }
             }); // ajax end
     }); //replyInsert click end
+
+    // 첨부파일 다운로드받기
+    $(".fileName").click(function() {
+         let fileName = $(this).text(); // 클릭된 파일 이름 가져오기
+         console.log("fileName  " + fileName);
+
+         // 파일 이름에서 확장자 추출
+         let fileExtension = fileName.split('.').pop().toLowerCase(); // 확장자
+         let fileNameWithoutExtension = fileName.substr(0, fileName.lastIndexOf('.')); // 파일이름
+         console.log("fileExtension  " + fileExtension);
+         console.log("fileNameWithoutExtension  " + fileNameWithoutExtension);
+
+         // 이미지 확장자 목록
+         let imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+         // 이미지 파일인지 확인
+         if (imageExtensions.includes(fileExtension)) {
+             alert("이미지 파일은 다운로드할 수 없습니다.");
+             return; // 이미지 파일인 경우 다운로드를 중단하고 함수를 종료
+         }
+
+        $.ajax({
+              url: "/freeboard/generatePresignedUrl",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ fileName: fileName }),
+              success: function(data) {
+                window.location.href = data.urls; //받은 응답에서 URL을 추출하고, 그 URL로 리다이렉트하여 파일 다운로드
+              },
+              error: function(xhr, status, error) {
+                  alert("다운로드에 실패 했습니다.");
+                  console.error(error);
+              }
+            });
+      }); // fileName click end
  }); // document end
 
 // 삭제버튼
@@ -286,10 +321,10 @@ function commentInsert(){
                <div class="file_content">
                    <c:forEach var="s3file" items="${s3FileUrlList}" varStatus="status">
                       <c:choose>
-                          <c:when test="${s3FileTypes[status.index] == 'png' or s3FileTypes[status.index] == 'jpg' or s3FileTypes[status.index] == 'jpeg' or s3FileTypes[status.index] == 'gif'}">
+                          <c:when test="${fn:toLowerCase(s3FileTypes[status.index]) == 'png' or fn:toLowerCase(s3FileTypes[status.index]) == 'jpg' or fn:toLowerCase(s3FileTypes[status.index]) == 'jpeg' or fn:toLowerCase(s3FileTypes[status.index]) == 'gif'}">
                                <div class="img_file">
                                    <span class="img_list">
-                                       <span>${s3FileNames[status.index]}.${s3FileTypes[status.index]}</span>
+                                       <span class="fileName">${s3FileNames[status.index]}.${s3FileTypes[status.index]}</span>
                                        <img src="${s3file}">
                                    </span><%-- img_list end --%>
                               </div> <%-- img_file end --%>
@@ -298,7 +333,7 @@ function commentInsert(){
                                 <div class="file">
                                      <div class="file_list">
                                          <img src="/resources/img/attach.png">
-                                        <div>${s3FileNames[status.index]}.${s3FileTypes[status.index]}</div>
+                                        <div class="fileName">${s3FileNames[status.index]}.${s3FileTypes[status.index]}</div>
                                       </div>
                                 </div>
                           </c:otherwise>

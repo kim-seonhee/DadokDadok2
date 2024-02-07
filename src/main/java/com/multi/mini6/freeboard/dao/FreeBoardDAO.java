@@ -124,4 +124,9 @@ public class FreeBoardDAO {
   public List<Object> boardAttachCheck(int board_id) {
     return sqlSession.selectList("boardAttachCheck", board_id);
   }
+
+  // 자유게시판 첨부파일 정보 파일 이름으로 찾기
+  public List<FreeBoardAttachVO> findByFileName(String fileName) {
+    return sqlSession.selectList("findByFileName", fileName);
+  }
 }
