@@ -133,7 +133,7 @@ ul, ol {list-style: none;}
  .bo_btn_box { display: flex; margin-bottom: 50px; justify-content: flex-end;}
  .bo_btn_box a,  .bo_btn_box button { display: block; padding: 8px 24px;  background: #0a58ca; border: 1px solid #0a58ca; border-radius: 5px; color: #fff; }
  .bo_btn_box .update_btn { margin: 0 10px; }
- .bo_title { padding: 26px 0; border: 1px solid #999; border-right: none; border-left: none; }
+ .bo_title { padding: 26px 0; border: 1px solid #ddd; border-right: none; border-left: none; }
  .bo_title p { padding: 0 6px; margin: 0;font-size: 28px; font-weight: 900; }
  .bo_title2 { display: flex; margin: 10px 0 80px; justify-content: space-between; flex-wrap: wrap; }
  .bo_title2 >div > span > span:nth-child(1) { margin-right: 6px; font-weight: 600; }
@@ -145,7 +145,6 @@ ul, ol {list-style: none;}
  .file_content .img_file { text-align: center; }
  .file_content .img_file .img_list span { display: block; text-align: center; }
  .file_content .img_file .img_list div { width: 200px; padding: 10px; }
- /*.file_content .img_file .img_list img { width: 100%; }*/
  .file_content .img_file .img_list img { max-width: 300px; }
  .file_content .file .file_list { display: flex; height: 30px; margin-bottom: 30px; align-items: center; cursor: pointer; }
  .file_content .file .file_list:last-child { margin-bottom: 0; }
@@ -153,11 +152,12 @@ ul, ol {list-style: none;}
  .file_content .file .file_list img { height: 100%; }
 
   .comment { padding: 50px 0; }
-  .comment > p { font-size: 18px; font-weight: 600 }
-  .comment .c_group { min-width: 500px; padding: 0 10px; }
-  .comment .c_parent { padding: 10px; border-bottom: 1px solid #ddd;}
-  .comment div.c_group:nth-of-type(1) .c_parent { border-top: 1px solid #ddd; }
-  .comment .c_child { display: flex; padding: 10px; border-bottom: 1px solid #ddd; }
+  .comment .cm_info { display: flex;  font-size: 18px; font-weight: 600; }
+  .comment .cm_info p { margin-right: 10px; }
+  .comment .c_group { min-width: 500px; padding: 0 10px; background: #fafafa; }
+  .comment .c_parent { padding: 10px; border-bottom: 1px solid #eee;}
+  .comment div.c_group:nth-of-type(1) .c_parent { border-top: 1px solid #eee; }
+  .comment .c_child { display: flex; padding: 10px; border-bottom: 1px solid #eee; }
   .comment .c_child > div i { display: block; width: 36px; height: 36px; line-height: 36px; font-size: 16px; color: #084298; transform: rotate(90deg); }
   .comment .c_child > div:nth-child(1) { width: 36px; padding-top: 7px; }
   .comment .c_child > div:nth-child(2){ width: calc(100% - 36px); }

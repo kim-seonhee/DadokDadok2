@@ -162,7 +162,7 @@
         values (#{board_id}, #{cm_content}, now(), now(), #{member_id}, 1, #{cm_group} )
     </insert>
 
-    <!--목록에서 제목 옆에 댓글 개수 표시-->
+    <!--자유게시판 게시글의 댓글 개수 구하기-->
     <select id="getCommentCountByBoardId" parameterType="int" resultType="int">
         select count(board_id) from board_comment where board_id = #{board_id}
     </select>
@@ -170,6 +170,11 @@
     <!--목록에서 제목 옆에 첨부파일 여부 확인-->
     <select id="boardAttachCheck" resultType="int">
         select board_id from board_attach where board_id = #{board_id};
+    </select>
+
+    <!--첨부파일 이름으로 찾기 -->
+    <select id="findByFileName" resultType="freeboardAttachVO">
+        select board_file_name from board_attach where board_file_name LIKE CONCAT('%', #{fileName})
     </select>
 
 </mapper>

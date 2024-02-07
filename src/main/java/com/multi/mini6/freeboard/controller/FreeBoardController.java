@@ -1,5 +1,7 @@
 package com.multi.mini6.freeboard.controller;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.multi.mini6.freeboard.vo.FreeBoardAttachVO;
 import com.multi.mini6.freeboard.vo.FreeBoardCommentVO;
 import com.multi.mini6.freeboard.vo.FreeBoardPageVO;
@@ -7,13 +9,15 @@ import com.multi.mini6.freeboard.vo.FreeBoardVO;
 import com.multi.mini6.freeboard.service.FreeBoardService;
 
 import java.io.*;
-import java.net.URLDecoder;
+import java.net.*;
 import java.security.Principal;
 import java.util.*;
+import com.amazonaws.HttpMethod;
 
 import com.multi.mini6.loginpage.vo.CustomUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +38,12 @@ public class FreeBoardController {
     @Autowired
     private FreeBoardService freeBoardService;
 
+    @Autowired
+    private AmazonS3 s3Client;
+
+    @Value("${bucketName}")
+    private String bucketName;
+
     //자유게시판 글 작성페이지로이동
     @GetMapping("/board_insert")
     public void getInsert() {
@@ -42,6 +52,7 @@ public class FreeBoardController {
     // 자유게시판 게시글 등록 + 첨부파일 등록(s3)
     @PostMapping("/board_insert")
     @ResponseBody
+    @Transactional
     public ResponseEntity<?> freeBoardInsertS3(@RequestParam("file") MultipartFile[] files,
                                                @ModelAttribute FreeBoardVO freeBoardVO,
                                                FreeBoardAttachVO freeBoardAttachVO) {
@@ -213,12 +224,15 @@ public class FreeBoardController {
         FreeBoardVO previousPost = freeBoardService.getPreviousPost(freeBoardVO.getBoard_id());
         FreeBoardVO nextPost = freeBoardService.getNextPost(freeBoardVO.getBoard_id());
 
-        // 게시글 내용 엔터처리
+        // 게시글 내용 엔터 처리
         String contentEnter = result.getBoard_content().replace("\r\n", "<br>");
         result.setBoard_content(contentEnter);
 
         // 해당 게시글의 댓글 목록 가져오기
         Map<Integer, List<FreeBoardCommentVO>> groupedComments = freeBoardService.findList(freeBoardVO.getBoard_id());
+
+        // 해당 게시글의 댓글 개수 가져오기
+        int commentCount = freeBoardService.getCommentCountByBoardId(freeBoardVO.getBoard_id());
 
         model.addAttribute("result", result);
         model.addAttribute("previousPost", previousPost);
@@ -226,10 +240,11 @@ public class FreeBoardController {
         model.addAttribute("page", page); // 모델에 페이지 번호 추가
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
-        model.addAttribute("groupedComments", groupedComments); // 댓글리스트
+        model.addAttribute("groupedComments", groupedComments); // 댓글 리스트
         model.addAttribute("s3FileUrlList", s3FileUrlList); // 파일첨부 url
-        model.addAttribute("s3FileNames", s3FileNames); // 파일이름
-        model.addAttribute("s3FileTypes", s3FileTypes); // 파일타입
+        model.addAttribute("s3FileNames", s3FileNames); // 파일 이름
+        model.addAttribute("s3FileTypes", s3FileTypes); // 파일 타입
+        model.addAttribute("commentCount", commentCount); // 댓글 개수
 
         return "/freeboard/board_one";
     }
@@ -421,6 +436,50 @@ public class FreeBoardController {
             result.put("success", false);
         }
         return result;
+    }
+
+    // 자유게시판 상세 페이지에서 첨부파일 다운로드
+    @PostMapping("/generatePresignedUrl")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> generatePresignedUrl(@RequestBody Map<String, String> payload) {
+        String fileName = payload.get("fileName");
+
+        // board_id를 사용하여 DB에서 파일 정보 가져오기
+        List<FreeBoardAttachVO> fileNames = freeBoardService.findByFileName(fileName);
+        log.info("fileNames {}", fileNames);
+
+        // 파일 정보가 없는 경우 처리
+        if (fileNames.isEmpty()) {
+            // 오류 처리 등을 수행하거나 다른 처리를 합니다.
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // 파일 정보가 있는 경우 presigned URL 생성
+        List<String> presignedUrls = new ArrayList<>();
+        for (FreeBoardAttachVO attachVO  : fileNames) {
+            // 파일이 있는 폴더 경로를 포함하여 CopySource 값 생성
+            String copySource = "FreeBoard/" + attachVO.getBoard_file_name();
+
+            Date expiration = new Date();
+            long expTimeMillis = expiration.getTime();
+            expTimeMillis += 1000 * 60 * 20; // 20분 후 만료
+            expiration.setTime(expTimeMillis);
+
+            // presigned URL 생성
+            GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                    new GeneratePresignedUrlRequest(bucketName, copySource)
+                            .withMethod(HttpMethod.GET)
+                            .withExpiration(expiration);
+
+            URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+            presignedUrls.add(url.toString());
+        }
+
+        // JSON 형식으로 응답 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("urls", presignedUrls);
+
+        return ResponseEntity.ok().body(response);
     }
 
 

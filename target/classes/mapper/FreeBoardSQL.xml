@@ -172,4 +172,9 @@
         select board_id from board_attach where board_id = #{board_id};
     </select>
 
+    <!--첨부파일 이름으로 찾기 -->
+    <select id="findByFileName" resultType="freeboardAttachVO">
+        select board_file_name from board_attach where board_file_name LIKE CONCAT('%', #{fileName})
+    </select>
+
 </mapper>
