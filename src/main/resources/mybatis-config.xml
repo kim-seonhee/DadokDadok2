@@ -12,11 +12,10 @@
 		<typeAlias type="com.multi.mini6.bookpage.vo.PageVO" alias="pageVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.loginpage.vo.AuthorityVO" alias="authorityVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.loginpage.vo.MemberVO" alias="memberVO"></typeAlias>
-		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewVO" alias="reviewVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.loginpage.vo.MemberDeleteReasonVO" alias="memberDeleteReasonVO"></typeAlias>
-		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewCommentVO" alias="reviewcommentVO"></typeAlias>
-		<typeAlias type="com.multi.mini6.reviewboard.vo.PageVo" alias="pageVO2"></typeAlias>
-		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewAttachVO" alias="reviewattachVO"></typeAlias>
+		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewBoardVO" alias="reviewBoardVO"></typeAlias>
+		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewBoardCommentVO" alias="reviewBoardCommentVO"></typeAlias>
+		<typeAlias type="com.multi.mini6.reviewboard.vo.ReviewBoardAttachVO" alias="reviewBoardAttachVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.noticeboard.vo.NoticeBoardVO" alias="noticeboardVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.noticeboard.vo.NoticeBoardPageVO" alias="noticeboardpageVO"></typeAlias>
 		<typeAlias type="com.multi.mini6.loginpage.vo.GuestBookVO" alias="guestBookVO"></typeAlias>
@@ -30,8 +29,7 @@
 
 	<mappers>
 		<!-- SQL문 정의하는 파일들의 목록을 지정. -->
-		<mapper resource="mapper/ReviewSQL2.xml" />
-		<mapper resource="mapper/ReviewCommentSQL.xml" />
+		<mapper resource="mapper/ReviewBoardSQL.xml" />
 		<mapper resource="mapper/MemberSQL.xml" />
 		<mapper resource="mapper/NoticeBoardSQL.xml" />
 		<mapper resource="mapper/GuestBookEntrySQL.xml" />

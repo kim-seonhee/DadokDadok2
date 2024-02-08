@@ -18,7 +18,7 @@
     </select>
 
     <!-- 후기게시판 글 업데이트 순 10개 가져오기 -->
-    <select id="reviewBoardListTen" resultType="reviewVO">
+    <select id="reviewBoardListTen" resultType="reviewBoardVO">
         select *
         from review
         order by review_createdAt desc limit 15;

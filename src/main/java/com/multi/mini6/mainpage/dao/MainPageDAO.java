@@ -2,7 +2,7 @@ package com.multi.mini6.mainpage.dao;
 
 import com.multi.mini6.freeboard.vo.FreeBoardVO;
 import com.multi.mini6.noticeboard.vo.NoticeBoardVO;
-import com.multi.mini6.reviewboard.vo.ReviewVO;
+import com.multi.mini6.reviewboard.vo.ReviewBoardVO;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,8 +26,8 @@ public class MainPageDAO {
   }
 
   //후기 리스트 가져오기
-    public List<ReviewVO> reviewListTen(ReviewVO reviewVO) {
-        return sqlSession.selectList("reviewBoardListTen", reviewVO);
+    public List<ReviewBoardVO> reviewListTen(ReviewBoardVO reviewBoardVO) {
+        return sqlSession.selectList("reviewBoardListTen", reviewBoardVO);
     }
 
 }

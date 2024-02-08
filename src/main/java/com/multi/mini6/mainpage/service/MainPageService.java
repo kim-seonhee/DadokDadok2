@@ -3,7 +3,7 @@ package com.multi.mini6.mainpage.service;
 import com.multi.mini6.freeboard.vo.FreeBoardVO;
 import com.multi.mini6.mainpage.dao.MainPageDAO;
 import com.multi.mini6.noticeboard.vo.NoticeBoardVO;
-import com.multi.mini6.reviewboard.vo.ReviewVO;
+import com.multi.mini6.reviewboard.vo.ReviewBoardVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ public class MainPageService {
     return mainPageDAO.noticeBoardListFive(noticeBoardVO);
   }
 
-  public List<ReviewVO> getReviewList(ReviewVO reviewVO) {
-    return mainPageDAO.reviewListTen(reviewVO);
+  public List<ReviewBoardVO> getReviewList(ReviewBoardVO reviewBoardVO) {
+    return mainPageDAO.reviewListTen(reviewBoardVO);
   }
 
 
