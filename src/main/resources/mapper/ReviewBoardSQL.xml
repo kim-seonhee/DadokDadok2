@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.mini6.reviewboard.dao.ReviewBoardDAO">
+	<!--<mapper namespace="reviewBoard">-->
+	<!-- 후기게시판 글 등록 -->
+	<insert id="reviewBoardInsert" parameterType="reviewBoardVO">
+		insert into review (member_id, review_createdAt, review_updatedAt, review_views, review_title, review_content)
+		values (#{member_id}, now(), now(), #{review_views}, #{review_title}, #{review_content})
+		<selectKey keyProperty="review_id" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<!-- -후기게시판 글 등록 - s3에 파일업로드 -->
+	<insert id="reviewBoardS3Insert" parameterType="reviewBoardAttachVO">
+		insert into review_attach (review_id, review_file_name)
+		values(#{review_id}, #{review_file_name})
+	</insert>
+
+	<!-- -후기게시판 글 상세보기 - s3에 있는 파일정보가져오기 -->
+	<select id="reviewBoardS3Find" parameterType="int" resultType="reviewBoardAttachVO">
+		select * from review_attach where review_id = #{review_id}
+	</select>
+
+	<!-- -후기게시판 글 상세보기 - s3에 있는 파일정보 삭제 -->
+	<select id="reviewBoardS3InfoDelete" parameterType="int">
+		delete from review_attach where review_id = #{review_id}
+	</select>
+
+	<!--  후기게시판 글 목록 -->
+	<select id="reviewBoardList" resultType="reviewBoardVO" parameterType="freeboardPageVO">
+		SELECT reviewList2.*, member.nickname
+		FROM (
+		SELECT review.*, ROW_NUMBER() OVER (ORDER BY review.review_createdAt DESC) as review_board_no
+		FROM review
+		WHERE review.member_id IN (
+		SELECT member_id FROM member
+		<if test="searchType == 'title'  and keyword != ''">
+			WHERE review_title LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="searchType == 'content' and keyword != ''">
+			WHERE review_content LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="searchType == 'writer' and keyword != ''">
+			WHERE member.nickname LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		)
+		) as reviewList2
+		JOIN member ON reviewList2.member_id = member.member_id
+		WHERE reviewList2.review_board_no BETWEEN #{start} AND #{end}
+	</select>
+
+	<!-- 후기게시판의 전체 게시물 개수 -->
+	<select id="reviewBoardCount" resultType="int" parameterType="freeboardPageVO">
+		SELECT COUNT(*)
+		FROM review
+		JOIN member ON review.member_id = member.member_id
+		<if test="searchType == 'title' and keyword != null">
+			WHERE review_title LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="searchType == 'content' and keyword != null">
+			WHERE review_content LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="searchType == 'writer' and keyword != null">
+			WHERE member.nickname LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+	</select>
+
+	<!--  후기게시판 글 상세보기 -->
+	<select id="reviewBoardOne" parameterType="reviewBoardVO" resultType="reviewBoardVO">
+		select r.*, m.nickname from review r
+		left join member m on r.member_id = m.member_id
+		where r.review_id = #{review_id}
+	</select>
+
+	<!-- 후기게시판 글 상세보기 - 조회수 증가 -->
+	<update id="reviewBoardViewsCount" parameterType="reviewBoardVO">
+		update review set review_views = review_views + 1 where review_id = #{review_id} and member_id != #{member_id}
+	</update>
+
+	<!-- 후기게시판 글 상세보기 - 이전글 정보 조회 -->
+	<select id="reviewBoardGetPreviousPost" parameterType="int" resultType="reviewBoardVO">
+		select * from review where review_id &lt; #{review_id} order by review_id desc limit 1
+		<!-- &lt; ==> "<" -->
+	</select>
+
+	<!-- 후기게시판 글 상세보기 - 다음글 정보 조회 -->
+	<select id="reviewBoardGetNextPost" parameterType="int" resultType="reviewBoardVO">
+		select * from review where review_id > #{review_id} order by review_id asc limit 1
+	</select>
+
+	<!-- 후기게시판 글 삭제-->
+	<delete id="reviewBoardDelete" parameterType="int">
+		delete from review where review_id = #{review_id}
+	</delete>
+
+	<!--  후기게시판 글 수정 -->
+	<update id="reviewBoardUpdate" parameterType="reviewBoardVO">
+		update review set review_title = #{review_title}, review_content = #{review_content}, review_updatedAt = now() where
+		review_id = #{review_id}
+	</update>
+
+
+
+	<!--댓글저장-->
+	<insert id="reviewBoardCommentInsert" parameterType="reviewBoardCommentVO">
+		insert into review_comment (review_id, cm_content, cm_createdAt, cm_modifiedAt, member_id, cm_class, cm_group)
+		select #{review_id}, #{cm_content}, now(), now(), #{member_id}, #{cm_class}, COALESCE(MAX(cm_group), 0) + 1
+		from review_comment where review_id = #{review_id}
+	</insert>
+
+	<!--댓글 리스트가져오기-->
+	<select id="reviewBoardCommentList" parameterType="reviewBoardCommentVO" resultType="reviewBoardCommentVO">
+		SELECT review_comment.*, member.nickname
+		FROM review_comment
+		JOIN member ON review_comment.member_id = member.member_id
+		WHERE review_comment.review_id = #{review_id}
+	</select>
+
+	<!--댓글 수정-->
+	<update id="reviewBoardCommentUpdate" parameterType="reviewBoardCommentVO">
+		update review_comment set cm_content = #{cm_content}, cm_modifiedAt = now() where review_cm_id = #{review_cm_id};
+	</update>
+
+	<!--댓글삭제-->
+	<delete id="reviewBoardCommentDelete" parameterType="map">
+		delete from review_comment where review_id = #{review_id} and cm_group = #{cm_group}
+	</delete>
+
+	<!--대댓글삭제-->
+	<delete id="reviewBoardCommentChildDelete" parameterType="int">
+		delete from review_comment where review_cm_id = #{review_cm_id}
+	</delete>
+
+	<!--대댓글입력-->
+	<insert id="reviewBoardCommentReply" parameterType="reviewBoardCommentVO">
+		insert into review_comment (review_id, cm_content, cm_createdAt, cm_modifiedAt, member_id, cm_class, cm_group)
+		values (#{review_id}, #{cm_content}, now(), now(), #{member_id}, 1, #{cm_group} )
+	</insert>
+
+	<!--후기게시판 게시글의 댓글 개수 구하기-->
+	<select id="getCommentCountByReviewId" parameterType="int" resultType="int">
+		select count(review_id) from review_comment where review_id = #{review_id}
+	</select>
+
+	<!--목록에서 제목 옆에 첨부파일 여부 확인-->
+	<select id="reviewAttachCheck" resultType="int">
+		select review_id from review_attach where review_id = #{review_id};
+	</select>
+
+	<!--첨부파일 이름으로 찾기 -->
+	<select id="findByFileName" resultType="reviewBoardAttachVO">
+		select review_file_name from review_attach where review_file_name LIKE CONCAT('%', #{fileName})
+	</select>
+
+</mapper>

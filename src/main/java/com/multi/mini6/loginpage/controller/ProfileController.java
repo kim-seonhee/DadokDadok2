@@ -4,7 +4,7 @@ import com.multi.mini6.loginpage.service.MemberService;
 import com.multi.mini6.loginpage.service.ProfileService;
 import com.multi.mini6.loginpage.vo.CustomUser;
 import com.multi.mini6.loginpage.vo.MemberVO;
-import com.multi.mini6.reviewboard.vo.ReviewVO;
+import com.multi.mini6.reviewboard.vo.ReviewBoardVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +54,11 @@ public class ProfileController {
     //로그인한 id 값에 맞는 review 리스트 가져오기
     @GetMapping("/review-list-by-id")
     @ResponseBody
-    public ResponseEntity<List<ReviewVO>> reviewListById() {
+    public ResponseEntity<List<ReviewBoardVO>> reviewListById() {
         CustomUser customUser = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int memberId = customUser.getMemberId();
         // member_id를 사용하여 리뷰 목록 가져오기
-        List<ReviewVO> reviews = profileService.getReviewListById(memberId);
+        List<ReviewBoardVO> reviews = profileService.getReviewListById(memberId);
         return ResponseEntity.ok(reviews);
     }
 }

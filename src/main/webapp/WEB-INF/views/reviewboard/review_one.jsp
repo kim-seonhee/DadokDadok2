@@ -1,367 +1,472 @@
-<%@page import="com.multi.mini6.reviewboard.vo.ReviewCommentVO" %>
-<%@page import="com.multi.mini6.reviewboard.vo.ReviewVO" %>
-<%@page import="java.util.List" %>
-<%@page import="com.multi.mini6.reviewboard.vo.ReviewVO" %>
-<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
-    session.setAttribute("user", "1");
-%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page isELIgnored="false" %>
+
 <!DOCTYPE html>
 <html>
 <jsp:include page="/WEB-INF/views/head.jsp"/>
-<style>
-    .text-content p {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        word-wrap: break-word;
-    }
 
-</style>
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery-3.7.1.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-        crossorigin="anonymous"></script>
+ <script type="text/javascript">
+   $(document).ready(function(){
+     // 원댓글 수정버튼 누르면 수정할 수 있는 textarea 보여지기
+     $(".parentUpdate").click(function(){
+          // closest: 선택요소를 포함한 상위 요소 중 지정한 선택자에 해당하는 첫번째 요소
+          let selectParent = $(this).closest(".c_parent").find(".c_update");
+          selectParent.css("display", "flex");
+     }); // parentUpdate onclick end
 
-<script type="text/javascript">
+    // 대댓글 수정버튼 누르면 수정할 수 있는 textarea 보여지기
+     $(".childUpdate").click(function(){
+          // closest: 선택요소를 포함한 상위 요소 중 지정한 선택자에 해당하는 첫번째 요소
+          let selectChild = $(this).closest(".c_child").find(".c_update");
+          selectChild.css("display", "flex");
+     }); // chlidUpdate onclick end
 
+    // 댓글 수정 취소누르면 textarea 보이지 않게하기
+    $(".updateRevoke").click(function(){
+          // textarea에 입력되어있던 원본 값 가져오기
+          let originalContent =$(this).siblings("textarea").data("content");
+          // textarea에 입력했던 값 대신 원본 값 넣기
+          $(this).siblings("textarea").val(originalContent);
+          $(this).closest(".c_update").css("display", "none");
+    });
 
-    $(document).ready(function () {
-        // 파일 불러오기
-        console.log("review_id: " + ${reviewVO.review_id});
-        (function () {
+    // 댓글 수정 - 수정완료버튼 클릭
+    $(".contentUpdate").click(function(){
+        // 수정내용
+        let cm_content = $(this).closest(".c_btn").siblings("textarea").val();
+        // 댓글 id
+        let review_cm_id = $(this).data('review_cm_id');
 
-
-            let review_id = ${reviewVO.review_id};
-            console.log("review_id22 : " + review_id);
-
-            let review_id_number = Number(review_id);  // 123
-            console.log("review_id_number : " + review_id_number);
-
-
-            $.getJSON("getAttachList/?review_id=" + review_id_number).done(function (arr) {
-
-
-                let img_str = "";
-                let file_str = "";
-                $(arr).each(function (i, attach) {
-                    // 이미지 파일인 경우 이미지 보여지기
-
-                    if (attach.review_file_type == "png" || attach.review_file_type == "jpg" || attach.review_file_type == "jpeg" || attach.review_file_type == "gif") {
-                        let fileCallPath = "/resources/reviewBoardUpload/" + attach.review_uuid + "_" + encodeURIComponent(attach.review_file_name);
-                        // let fileCallPath = "/Users/Kang/DadokDadok/src/main/webapp/resources/reviewBoardUpload/" + attach.review_uuid + "_" + encodeURIComponent(attach.review_file_name);
-
-                        console.log("fileCallPath JSP : " + fileCallPath);
-
-                        img_str += "<span class='img_list' data-uuid='" + attach.review_uuid + "' data-filename='" + attach.review_file_name + "' data-type='" + attach.review_file_type + "'>";
-                        img_str += "<span>" + attach.review_file_name + "</span>";
-                        img_str += "<div><img src='" + fileCallPath + "'></div></span></div></div>";
-
-                        $(".img_file").html(img_str);
-                    } else {
-                        // 이미지 파일이 아닌경우
-
-                        file_str += "<div class='file_list' data-uuid='" + attach.review_uuid + "' data-filename='" + attach.review_file_name + "' data-type='" + attach.review_file_type + "'> ";
-                        file_str += "<div><img src='/resources/img/attach.png'></div>";
-                        file_str += "<span>" + attach.review_file_name + "</span></div>";
-                        $(".file").html(file_str);
-                    } // if end
-                }); // arr each end
-
-            }); // getJSON end
-        })();// function end
-        // ============================================================================================
-
-        $(".btn-edit").click(function () {
-
-
-            let cm_id = this.value;
-            let content = $("#cm_content_" + cm_id).val();
-            let member_id = $("#member_id_" + cm_id).val();
-
-
-            $("#div_" + cm_id).empty();
-            $("#div_" + cm_id).append(member_id + "<br />");
-            $("#div_" + cm_id).append("<input type='text' id='content_" + cm_id + "' value ='" + content + "'>");
-            $("#div_" + cm_id).append("<button class='btn btn-success btn-update' value='" + cm_id + "'>완료</button>");
-            $("#div_" + cm_id).append("<input type='hidden' id='member_id_" + cm_id + "' value ='" + member_id + "'>");
-            //hidden 필드 만들기 member_id
-
-        }); // btn-edit click end
-
-        $(document).on("click", ".btn-delete", function () {
-
-            let cm_id = $(this).val();
-
-            $.ajax({
-                url: "review_comment_delete", // 삭제를 담당하는 컨트롤러 URL
-                data: {
-                    cm_id: cm_id // 삭제할 댓글의 ID
-                },
-                success: function (response) {
-                    $('#div_${cm_id}').parent().remove();
-                    location.reload();
-                    alert("댓글 삭제가 완료되었습니다.");
-                } //success
-            }); //ajax
-        }); //document.on btn-delete click end
-
-        $(document).on("click", ".btn-update", function () {
-            let cm_id = $(this).val();
-            let updatedContent = $("#content_" + cm_id).val()
-            let updatedWriter = $("#member_id_" + cm_id).val();
-
-            $("#div_" + cm_id).empty();
-            $("#div_" + cm_id).append(updatedWriter + "<br />" + updatedContent)
-            console.log(cm_id)
-            console.log("updatedContent : " + updatedContent)
-            console.log("updatedWriter  : " + updatedWriter)
-
-
-            $.ajax({
-                url: "review_comment_update",
-                data: {
-
-                    cm_id: cm_id,
-                    cm_content: updatedContent
-
-                },
-                success: function (response1) {
-                    $('#div_').append("<div class='card mb-2'><div class='card-body'>" + response1 + "</div></div>")
-                    location.reload();
-
-                    alert("댓글 수정이 완료되었습니다.")
-
-
-                }
-            }); // ajax end
-        }); // btn-update click end
-
-        // ==========================================================================================================================
-        $('#b1').click(function () {
-            // 입력된 댓글 내용 및 사용자 정보
-            const reviewId = '${reviewVO.review_id}';
-            const commentContent = $('#review').val();
-            const memberId = '${reviewCommentVO.member_id}';
-
-            // Ajax 요청
-
-            if (commentContent.trim() === '') {
-                alert("댓글 내용을 입력하세요.");
-                return; // Stop further execution
-            }
-            $.ajax({
-                url: "review_comment_insert",
-                type: "POST",
-                data: {
-                    review_id: reviewId,
-                    cm_content: commentContent,
-                    member_id: memberId
-                },
-                success: function (response) {
-                    // 성공적으로 저장된 댓글을 화면에 동적으로 추가
-                    const commentHtml = `<div class='card mb-2'><div class='card-body'>${response.cm_content}<button class='btn-edit' id='btn_d${response.cm_id}' value='${response.cm_id}'>댓글수정</button><button class='btn-delete' id='btn_d${response.cm_id}' value='${response.cm_id}'>댓글삭제</button></div></div>`;
-
-                    $('#result').append(commentHtml);
-                    location.reload();
-
-                    // 입력 필드 초기화
-                    $('#review').val('');
-
-                    alert("댓글 작성이 완료되었습니다.");
-                }
-            });// ajax end
-        });// b1 click end
-
-
-    });// document ready end
-
-    function reviewDelete(review_id) {
-        let reviewId = ${reviewVO.review_id};
-
-        if (confirm("정말로 삭제하시겠습니까?")) {
-
-            // fileList 변수를 정의
-            let fileList = [];
-
-            // fileList 파일 정보 추가
-            $(".file_list, .img_list").each(function (i, fileContent) {
-                //$(".file").each(function (i, fileContent) {
-
-                var uuid = $(fileContent).data("uuid");
-                var fileName = $(fileContent).data("filename");
-                var fileType = $(fileContent).data("type");
-
-                console.log("uuid" + uuid)
-                console.log("filename" + fileName)
-                console.log("fileType" + fileType)
-
-                if (uuid && fileName && fileType) {
-                    let attach = {
-                        review_id: reviewId,
-                        review_uuid: uuid,
-                        review_file_name: fileName,
-                        review_file_type: fileType
-                    };
-                    fileList.push(attach);
-                } // if end
-            }); // each end
-            //console.log("fileList : ", fileList);
-            //console.log(JSON.stringify(fileList, null, 2));
-            console.log(fileList.length)
-            // 첨부파일이 있을때 파일+게시글 삭제
-            if (fileList.length > 0) {
-
-                $.ajax({
-                    type: "POST",
-                    url: "/reviewboard/fileDelete",
-                    contentType: "application/json",
-                    data: JSON.stringify(fileList),
-                    success: function (response) {
-                        console.log("서버 응답:", response);
-                        // 성공적으로 데이터를 전송한  후 목록페이지로 이동
-                        window.location.href = "/reviewboard/review_list3";
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("에러 발생:", error);
-                        // 에러 처리 로직
-                    }
-                }); // ajax end
-            } else {
-                // 첨부파일 없을때 게시글만 삭제
-                deleteBoard(review_id);
-            }
-        }
-        ; //confirm end
-    }; //boardDelete end
-    // 첨부파일 없을때 게시글만 삭제
-    function deleteBoard(review_id) {
         $.ajax({
-            type: "POST",
-            url: "/reviewboard/review_delete?review_id=" + review_id,
-            success: function (response) {
-                console.log("게시글 삭제 성공:", response);
-                window.location.href = "/reviewboard/review_list3";
-            },
-            error: function (xhr, status, error) {
-                console.error("게시글 삭제 에러 발생:", error);
-            }
-        });
-    }
+              url: "/reviewboard/comment_update",
+              type: "PUT",
+              contentType: "application/json",
+              data: JSON.stringify({
+                    review_cm_id: review_cm_id,
+                    cm_content: cm_content
+              }),
+              success: function(response) {
+                  location.reload(); // 새로고침
+              },
+              error: function(xhr, status, error) {
+                  // 오류 처리
+                  console.error('댓글 수정에 실패했습니다.');
+              }
+         }); // ajax end
+    }); //contentUpdate click end
 
-</script>
+    // 댓글 삭제
+    $(".cmDeleteBtn").click(function(){
+        // 게시글 id
+        let delete_review_id = $(this).data("review_id");
+        // 댓글 group
+        let delete_group = $(this).data("group");
 
+         $.ajax({
+              url: "/reviewboard/comment_delete",
+              type: "POST",
+              data: {
+                review_id: delete_review_id,
+                cm_group: delete_group
+              },
+             success: function(response) {
+                   alert("댓글이 성공적으로 삭제 되었습니다.");
+                    location.reload(); // 새로고침
+             },
+             error: function(xhr, status, error) {
+                   alert("댓글 삭제 실패 했습니다.");
+                   // 오류 처리
+                   console.error("error: " + error);
+                   console.error("status: " + status);
+                   console.error("xhr: " + xhr);
+             }
+         }); // ajax end
+    }); //cmDeleteBtn click end
+
+    // 대댓글 삭제
+    $(".childCmDeleteBtn").click(function(){
+        // 댓글 id
+        let delete_review_cm_id = $(this).data("review_cm_id");
+
+         $.ajax({
+              url: "/reviewboard/comment_child_delete",
+              type: "POST",
+              data: {
+                review_cm_id: delete_review_cm_id
+              },
+             success: function(response) {
+                   alert("대댓글이 성공적으로 삭제 되었습니다.");
+                    location.reload(); // 새로고침
+             },
+             error: function(xhr, status, error) {
+                   alert("대댓글 삭제 실패 했습니다.");
+                   // 오류 처리
+                   console.error("error: " + error);
+                   console.error("status: " + status);
+                   console.error("xhr: " + xhr);
+             }
+         }); // ajax end
+    }); //childCmDeleteBtn click end
+
+    // 댓글 버튼 누르면 대댓글 입력할 수 있는 textarea 보여지기
+     $(".replyBtn").click(function(){
+          // closest: 선택요소를 포함한 상위 요소 중 지정한 선택자에 해당하는 첫번째 요소
+          let selectChild = $(this).closest(".c_parent").find(".reply");
+          selectChild.css("display", "flex");
+     }); // replyBtn click end
+
+    // 대댓글  취소누르면 textarea 보이지 않게하기
+    $(".replyRevoke").click(function(){
+        // 입력 했던 값 초기화
+        $(this).siblings("textarea").val("");
+        $(this).closest(".reply").css("display", "none");
+    });
+
+    // 대댓글 입력
+    $(".replyInsert").click(function(){
+        console.log("click");
+            // 대댓글내용
+            let cm_content = $(this).closest(".c_btn").siblings("textarea").val();
+            // 댓글 id
+            let review_id = $(this).data('review_id');
+            // 댓글 그룹
+            let cm_group = $(this).data('cm_group');
+            // 대댓글 member_id
+            let rpMemberId = $("#rpMemberId").val();
+            //console.log("cm_content " + cm_content);
+           // console.log("reviewboard/_id " + review_id);
+           // console.log("cm_group " + cm_group);
+
+            $.ajax({
+                  url: "/reviewboard/comment_reply",
+                  type: "POST",
+                  contentType: "application/json",
+                  data: JSON.stringify({
+                        review_id: review_id,
+                        cm_content: cm_content,
+                        cm_group: cm_group,
+                        member_id: rpMemberId
+                  }),
+                  success: function(response) {
+                      location.reload(); // 새로고침
+                  },
+                  error: function(xhr, status, error) {
+                      // 오류 처리
+                      console.error('대댓글 입력에 실패했습니다.');
+                  }
+            }); // ajax end
+    }); //replyInsert click end
+
+    // 첨부파일 다운로드받기
+    $(".fileName").click(function() {
+         let fileName = $(this).text(); // 클릭된 파일 이름 가져오기
+         console.log("fileName  " + fileName);
+
+         // 파일 이름에서 확장자 추출
+         let fileExtension = fileName.split('.').pop().toLowerCase(); // 확장자
+         let fileNameWithoutExtension = fileName.substr(0, fileName.lastIndexOf('.')); // 파일이름
+         console.log("fileExtension  " + fileExtension);
+         console.log("fileNameWithoutExtension  " + fileNameWithoutExtension);
+
+         // 이미지 확장자 목록
+         let imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+         // 이미지 파일인지 확인
+         if (imageExtensions.includes(fileExtension)) {
+             alert("이미지 파일은 다운로드할 수 없습니다.");
+             return; // 이미지 파일인 경우 다운로드를 중단하고 함수를 종료
+         }
+
+        $.ajax({
+              url: "/reviewboard/generatePresignedUrl",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ fileName: fileName }),
+              success: function(data) {
+                window.location.href = data.urls; //받은 응답에서 URL을 추출하고, 그 URL로 리다이렉트하여 파일 다운로드
+              },
+              error: function(xhr, status, error) {
+                  alert("다운로드에 실패 했습니다.");
+                  console.error(error);
+              }
+            });
+      }); // fileName click end
+ }); // document end
+
+// 삭제버튼
+ function boardDelete(review_id, cm_group ) {
+     let reviewId = review_id;
+     let cmGroup = cm_group;
+      if(confirm("정말 삭제하시겠습니까?")) {
+             $.ajax({
+                 url: "/reviewboard/review_delete",
+                 type: "post",
+                 data:{
+                     review_id: reviewId,
+                     cm_group: cmGroup
+                 },
+                 success: function(data) {
+                     console.log("data : " + data);
+                     if(data.success) {
+                         alert("게시글이 성공적으로 삭제되었습니다.");
+                        window.location.href = "/reviewboard/review_list";
+                     } else {
+                         alert("게시글 삭제에 실패하였습니다.");
+                     }
+                 },
+                 error: function(jqXHR, textStatus, errorThrown) {
+                          console.log(jqXHR);        // 응답 객체
+                          console.log(textStatus);   // 상태 문자열
+                          console.log(errorThrown);  // 예외 정보
+                          alert("게시글 삭제 중 오류가 발생하였습니다.");
+                 }
+             });
+      }
+}; //boardDelete end
+
+// 댓글 작성
+function commentInsert(){
+    let content = $("#cmContent").val();
+    let reviewId = ${result.review_id};
+    let memberId = $("#cmMemberId").val();
+    //console.log("content : " + content);
+    //console.log("reviewId : " + reviewId);
+
+    $.ajax({
+        type: "post",
+        url: "/reviewboard/comment_insert",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify({
+                cm_content: content,
+                review_id: reviewId,
+                member_id: memberId
+        }),
+        success: function(groupedComments){
+            location.reload(); // 새로고침
+        },
+        error: function(xhr, status, error) {
+          console.error("댓글 등록 에러 발생:", error);
+        }
+    }); // ajax end
+}
+
+   </script>
 <body>
+    <!-- ======= Top Bar ======= -->
+    <jsp:include page="/WEB-INF/views/topbar.jsp"/>
+    <!-- End Top Bar -->
+    <%-- header --%>
+    <jsp:include page="/WEB-INF/views/header.jsp"/>
 
-
-<!-- ======= Top Bar ======= -->
-<jsp:include page="/WEB-INF/views/topbar.jsp"/>
-<!-- End Top Bar -->
-
-<%-- header --%>
-<jsp:include page="/WEB-INF/views/header.jsp"/>
-
-<main id="main">
-    <!-- ======= Breadcrumbs ======= -->
-    <section id="breadcrumbs" class="breadcrumbs">
-        <div class="container">
-
-            <div class="d-flex justify-content-between align-items-center">
-                <h2>상세페이지</h2>
-                <ol>
-                    <li><a href="../mainpage/index">Home</a></li>
-                    <li>Setting</li>
-                </ol>
+    <main id="main">
+        <!-- ======= Breadcrumbs ======= -->
+        <section id="breadcrumbs" class="breadcrumbs">
+            <div class="container">
+                 <div class="d-flex justify-content-between align-items-center">
+                      <h2>후기게시판</h2>
+                      <ol>
+                          <li><a href="../mainpage/index">Home</a></li>
+                          <li>후기게시판</li>
+                      </ol>
+                 </div>
             </div>
-
-        </div>
-    </section><!-- End Breadcrumbs -->
-    <div class="reviewboard">
-        <div class="container rv_btn">
-            <div class="row">
-                <div class="col-md-6"></div> <!-- 왼쪽 여백을 만들기 위한 빈 칼럼 -->
-                <div class="col-md-6 d-flex justify-content-end"> <!-- 오른쪽 상단 맨 끝으로 버튼 배치 -->
-                    <sec:authorize access="isAuthenticated()">
-                        <a href="review_update_move?review_id=${reviewVO.review_id}"
-                           class="btn btn-primary mr-2 update_btn">글 수정하기</a>
-                        <button type="button" onclick="reviewDelete(${reviewVO.review_id})" id="deleteBtn"
-                                class="btn btn-primary">삭제
-                        </button>
-                    </sec:authorize>
-                </div>
+        </section><!-- End Breadcrumbs -->
+        <section class="freeboard">
+            <div class="b_info">
+                 <p>후기게시판 </p>
+                 <div>독서 후기를 자유롭게 작성할 수 있는 공간 입니다.</div>
             </div>
-        </div>
-        <div>
-            <div class="container rv_inner">
-                <div class="title-section">
-                    <h2>${reviewVO.review_title}</h2>
+            <div class="review_one">
+                <div class="bo_btn_box">
+                  <a href="review_list?page=${page}&searchType=${searchType}&keyword=${keyword}" class="list_btn">목록</a>
+                  <sec:authentication property="principal" var="pinfo"/>
+                      <c:if test="${pinfo.member.member_id eq result.member_id}"> <%-- 로그인한 유저인 경우에만 버튼 보임 --%>
+                          <a href="/reviewboard/review_update?review_id=${result.review_id}" class="update_btn">수정</a>
+                          <button type="button" onclick="boardDelete(${result.review_id})" id="deleteBtn">삭제</button>
+                      </c:if>
                 </div>
-                <div class="rv_title">
-                    <p>작성자: ${reviewVO.member_id}</p>
-                    <p>작성일자: <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="${reviewVO.review_createdAt}"/></p>
-                    <%-- <p>수정일자: <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="${reviewVO.review_updatedAt}" /></p> --%>
-                    <p>조회수: ${reviewVO.review_views}</p>
+                <div class="bo_title">
+                   <p>${result.review_title}</p>
                 </div>
-
-                <div class="rv_content">
-                    <div class="rv_file">
-                        <div class="img_file">
-                            <!-- Image goes here -->
-                        </div>
+                <div class="bo_title2">
+                     <div class="t2_left">
+                          <span>
+                               <span>작성자</span>
+                               <span>${result.nickname}</span>
+                          </span>
+                          <span>
+                               <span>조회수</span>
+                               <span>${result.review_views}</span>
+                          </span>
+                     </div>
+                     <div class="t2_right">
+                          <span>
+                               <span>등록일</span>
+                               <span><fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="${result.review_createdAt}"/></span>
+                          </span>
+                          <span>
+                               <span>수정일</span>
+                              <span><fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="${result.review_updatedAt}"/></span>
+                          </span>
+                   </div>
+               </div>
+               <div class="bo_content">
+                   <p>${result.review_content}</p>
+                </div>
+               <div class="file_content">
+                   <c:forEach var="s3file" items="${s3FileUrlList}" varStatus="status">
+                      <c:choose>
+                          <c:when test="${fn:toLowerCase(s3FileTypes[status.index]) == 'png' or fn:toLowerCase(s3FileTypes[status.index]) == 'jpg' or fn:toLowerCase(s3FileTypes[status.index]) == 'jpeg' or fn:toLowerCase(s3FileTypes[status.index]) == 'gif'}">
+                               <div class="img_file">
+                                   <span class="img_list">
+                                       <span class="fileName">${s3FileNames[status.index]}.${s3FileTypes[status.index]}</span>
+                                       <img src="${s3file}">
+                                   </span><%-- img_list end --%>
+                              </div> <%-- img_file end --%>
+                          </c:when>
+                           <c:otherwise>
+                                <div class="file">
+                                     <div class="file_list">
+                                         <img src="/resources/img/attach.png">
+                                        <div class="fileName">${s3FileNames[status.index]}.${s3FileTypes[status.index]}</div>
+                                      </div>
+                                </div>
+                          </c:otherwise>
+                      </c:choose>
+                   </c:forEach>
+               <div><%-- file_content end --%>
+            </div>
+               </div>
+               <div class="comment">
+                    <div class="cm_info">
+                        <p>댓글</p>
+                        <div>${commentCount}</div>
                     </div>
-                    <div class="text-content" style="text-align: center; margin-top: 20px; overflow: hidden; word-wrap: break-word;">
-                        <p>${reviewVO.review_content}</p>
-                    </div>
-
-                </div>
-
-
-                <div class="input-group rv_cm">
-                    <input id="review" type="text" class="form-control" placeholder="댓글입력">
-                    <div class="input-group-append">
-                        <button id="b1" class="btn btn-primary" type="button">댓글 달기</button>
-                    </div>
-                </div>
-                <!-- 댓글 목록 -->
-                <div id="result">
-                    <%
-                        List<ReviewCommentVO> list = (List<ReviewCommentVO>) request.getAttribute("list");
-                        for (ReviewCommentVO dto : list) {
-                    %>
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <div id="div_<%=dto.getCm_id()%>">
-                                <%=dto.getNickname()%> <br/>
-                                <%=dto.getCm_content()%> <br/>
-                                <fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="<%=dto.getCm_createAt()%>"/><br/>
-                                <input type="hidden" id="cm_content_<%=dto.getCm_id()%>"
-                                       value="<%=dto.getCm_content()%>">
-                                <input type="hidden" id="member_id_<%=dto.getCm_id()%>" value="<%=dto.getMember_id()%>">
-                                <sec:authorize access="isAuthenticated()">
-                                    <sec:authentication property="principal.member.member_id" var="loggedInMemberId"/>
-                                    <%-- 댓글 작성자 ID와 로그인한 사용자의 ID가 같은지 확인 --%>
-                                    <c:if test="${dto.member_id == loggedInMemberId}">
-                                        <div class="title_btn">
-                                            <button class='btn btn-primary btn-sm btn-edit' id="btn_<%=dto.getCm_id()%>"
-                                                    value="<%=dto.getCm_id()%>">댓글수정
-                                            </button>
-                                            <button class='btn btn-danger btn-sm btn-delete'
-                                                    id="btn_d<%=dto.getCm_id()%>" value="<%=dto.getCm_id()%>">댓글삭제
-                                            </button>
+                    <c:forEach items="${groupedComments}" var="entry">
+                    <div class="c_group">
+                         <c:forEach items="${entry.value}" var="comment">
+                            <c:if test="${comment.cm_class == 0}">
+                                <div class="c_parent">
+                                    <div class="c_title">
+                                        <div class="title_info">
+                                           <p>${comment.nickname}</p>
+                                          <p>(<fmt:formatDate  pattern="yyyy-MM-dd HH:mm:ss" value="${comment.cm_createdAt}"/>)</p>
+                                          <p>(<fmt:formatDate  pattern="yyyy-MM-dd HH:mm:ss" value="${comment.cm_modifiedAt}"/>)</p>
                                         </div>
-                                    </c:if>
-                                </sec:authorize>
-
-                            </div>
-                        </div>
+                                        <div class="title_btn">
+                                             <button type="button" class="replyBtn">댓글</button>
+                                              <sec:authorize access="isAuthenticated()">
+                                                      <%-- 댓글 작성자와 로그인한 사용자가 같을 경우에만 수정 및 삭제 버튼을 표시 --%>
+                                                      <sec:authentication property="principal.member.member_id" var="loggedInMemberId" />
+                                                      <c:if test="${comment.member_id eq loggedInMemberId}">
+                                                          <button type="button" class="parentUpdate">수정</button>
+                                                          <button type="button" class="cmDeleteBtn" data-review_id="${result.review_id}" data-group="${comment.cm_group}">삭제</button>
+                                                      </c:if>
+                                             </sec:authorize>
+                                        </div>
+                                    </div>
+                                    <div class="c_content">
+                                        <p>${comment.cm_content}</p>
+                                        <div class="c_update"> <%-- 댓글수정 --%>
+                                              <textarea data-content="${comment.cm_content}">${comment.cm_content}</textarea>
+                                               <sec:authorize access="isAuthenticated()">
+                                                    <%-- 댓글 작성자와 로그인한 사용자가 같을 경우에만 수정 및 삭제 버튼을 표시 --%>
+                                                    <sec:authentication property="principal.member.member_id" var="loggedInMemberId" />
+                                                        <c:if test="${comment.member_id eq loggedInMemberId}">
+                                                            <div class="c_btn">
+                                                                <button type="button" class="contentUpdate" data-review_cm_id="${comment.review_cm_id}">수정완료</button>
+                                                                 <button type="button" class="updateRevoke">취소</button>
+                                                            </div>
+                                                        </c:if>
+                                               </sec:authorize>
+                                        </div>
+                                        <div class="reply"> <%-- 대댓글 입력 --%>
+                                              <textarea placeholder="댓글을 입력해주세요."></textarea>
+                                              <div class="c_btn">
+                                                <button type="button" class="replyInsert" data-review_id="${comment.review_id}" data-cm_group="${comment.cm_group}">완료</button>
+                                                <button type="button" class="replyRevoke">취소</button>
+                                                <input type="hidden" id="rpMemberId" value="<sec:authentication property='principal.member.member_id'/>" />
+                                              </div>
+                                        </div>
+                                    </div>
+                                </div><%-- c_parent end--%>
+                            </c:if>
+                             <c:if test="${comment.cm_class == 1}">
+                                <div class="c_child">
+                                    <div><i class="fas fa-level-up-alt"></i></i></div>
+                                    <div>
+                                        <div class="c_title">
+                                            <div class="title_info">
+                                               <p>${comment.nickname}</p>
+                                              <p>(<fmt:formatDate  pattern="yyyy-MM-dd HH:mm:ss" value="${comment.cm_createdAt}"/>)</p>
+                                              <p>(<fmt:formatDate  pattern="yyyy-MM-dd HH:mm:ss" value="${comment.cm_modifiedAt}"/>)</p>
+                                            </div>
+                                            <sec:authorize access="isAuthenticated()">
+                                                <%-- 댓글 작성자와 로그인한 사용자가 같을 경우에만 수정 및 삭제 버튼을 표시 --%>
+                                                <sec:authentication property="principal.member.member_id" var="loggedInMemberId" />
+                                                    <c:if test="${comment.member_id eq loggedInMemberId}">
+                                                        <div class="title_btn">
+                                                            <button type="button" class="childUpdate">수정</button>
+                                                             <button type="button" class="childCmDeleteBtn" data-review_id="${result.review_id}"  data-group="${comment.cm_group}" data-review_cm_id="${comment.review_cm_id}">삭제</button>
+                                                        </div>
+                                                    </c:if>
+                                            </sec:authorize>
+                                        </div>
+                                        <div class="c_content">
+                                            <p>${comment.cm_content}</p>
+                                            <div class="c_update">
+                                                  <textarea data-content="${comment.cm_content}">${comment.cm_content}</textarea>
+                                                  <div class="c_btn">
+                                                      <button type="button"  class="contentUpdate" data-review_cm_id="${comment.review_cm_id}">수정완료</button>
+                                                      <button type="button" class="updateRevoke">취소</button>
+                                                  </div>
+                                            </div>
+                                        </div>
+                                     </div>
+                                 </div><%-- c_child end --%>
+                             </c:if>
+                            </c:forEach>
+                        </div> <%-- c_group end --%>
+                     </c:forEach>
+                    <div class="c_input">
+                          <p>댓글작성</p>
+                          <div>
+                              <textarea id="cmContent" placeholder="내용을 입력하세요"></textarea>
+                              <button type="button" id="cmInsertBtn" onclick="commentInsert()">등록</button>
+                          </div>
+                          <input type="hidden" id="cmMemberId" value="<sec:authentication property='principal.member.member_id'/>" />
                     </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+              </div><%-- comment end --%>
+         </div><%-- review_one end --%>
+       <div class="bo_page">
+          <div>
+           <%-- 이전글 --%>
+               <c:if test="${not empty previousPost}">
+                   <span>이전글</span>
+                   <div class="pre_link">
+                        <a href="${pageContext.request.contextPath}/reviewboard/review_one?review_id=${previousPost.review_id}&page=${page}&searchType=${searchType}&keyword=${keyword}">${previousPost.review_title}</a>
+                   </div>
+               </c:if>
+           </div>
+           <div>
+               <%-- 다음글  --%>
+               <c:if test="${not empty nextPost}">
+                   <span>다음글</span>
+                   <div class="next_link">
+                        <a href="${pageContext.request.contextPath}/reviewboard/review_one?review_id=${nextPost.review_id}&page=${page}&searchType=${searchType}&keyword=${keyword}">${nextPost.review_title}</a>
+                   </div>
+               </c:if>
+           </div>
+
+       </div>
+    </section>
+
+</main> <%-- main end --%>
 <!-- ======= Footer ======= -->
 <jsp:include page="/WEB-INF/views/footer.jsp"/>
 <!-- End Footer -->

@@ -182,7 +182,7 @@
         ORDER BY r.review_updatedAt DESC
     </select>
 
-    <resultMap id="reviewResultMap" type="ReviewVO">
+    <resultMap id="reviewResultMap" type="ReviewBoardVO">
         <id column="review_id" property="review_id"/>
         <result column="nickname" property="nickname"/>
     </resultMap>

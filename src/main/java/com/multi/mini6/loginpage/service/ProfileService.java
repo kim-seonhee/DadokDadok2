@@ -1,7 +1,7 @@
 package com.multi.mini6.loginpage.service;
 
 import com.multi.mini6.loginpage.dao.ProfileDAO;
-import com.multi.mini6.reviewboard.vo.ReviewVO;
+import com.multi.mini6.reviewboard.vo.ReviewBoardVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class ProfileService {
 
     final private ProfileDAO profileDAO;
 
-    public List<ReviewVO> getReviewListById(int memberId) {
+    public List<ReviewBoardVO> getReviewListById(int memberId) {
         return profileDAO.getReviewListById(memberId);
     }
 }

@@ -20,7 +20,7 @@
             <ul>
                 <li><a href="/bookpage/bookmain">도서</a></li>
                 <li><a href="/librarypage/library_list3?page=1">도서관</a></li>
-                <li><a href="/reviewboard/review_list3?page=1">도서후기</a></li>
+                <li><a href="/reviewboard/review_list">도서후기</a></li>
                 <li><a href="/freeboard/board_list">자유게시판</a></li>
                 <li><a href="/noticeboard/noticeboard">공지사항</a></li>
 
