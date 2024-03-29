@@ -43,6 +43,10 @@
         // 가져온 ISBN을 #isbnText에 넣음
         $("#isbnText").val(isbn);
 
+        // 책 이름 내용에 넣기
+        let resultBookName = $(this).parent().siblings("p.r_title").text();
+        $("textarea[name='review_content']").val(resultBookName);
+
         // 검색어, 결과 초기화
         $("#bookName").val("");
         $("#search_result").empty();
