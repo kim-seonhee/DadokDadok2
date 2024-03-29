@@ -1,34 +1,37 @@
 package com.multi.mini6.reviewboard.controller;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.multi.mini6.freeboard.vo.FreeBoardPageVO;
+import com.multi.mini6.loginpage.vo.CustomUser;
 import com.multi.mini6.reviewboard.service.ReviewBoardService;
 import com.multi.mini6.reviewboard.vo.ReviewBoardAttachVO;
 import com.multi.mini6.reviewboard.vo.ReviewBoardCommentVO;
 import com.multi.mini6.reviewboard.vo.ReviewBoardVO;
-
-import java.io.*;
-import java.net.*;
-import java.security.Principal;
-import java.util.*;
-import com.amazonaws.HttpMethod;
-
-import com.multi.mini6.loginpage.vo.CustomUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.*;
 
 @Controller
 @RequestMapping("/reviewboard")
@@ -43,6 +46,13 @@ public class ReviewBoardController {
 
     @Value("${bucketName}")
     private String bucketName;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${kakaoKey}")
+    private String kakaoKey;
+
 
     //후기게시판 글 작성페이지로이동
     @GetMapping("/review_insert")
@@ -93,6 +103,29 @@ public class ReviewBoardController {
             return ResponseEntity.ok().body("파일 업로드 성공: " + String.join(", ", uploadedFiles));
         }
 
+    }
+
+    // 후기게시판 isbn 검색
+    @GetMapping("/searchBook")
+    public ResponseEntity<?> searchBook(@RequestParam String bookName) {
+        String encodedBookName = URLEncoder.encode(bookName, StandardCharsets.UTF_8);
+
+        String url = "https://dapi.kakao.com/v3/search/book?target=title&query=" + bookName;
+
+        // 카카오 API의 Authorization 헤더에 필요한 형태로 kakaoApiKey를 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoKey);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            // amazonaws.HttpMethod와 충돌하여 org.springframework.http.HttpMethod를 직접 명시함
+            ResponseEntity<String> responseEntity = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .body(responseEntity.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카카오 API 호출 중 오류가 발생했습니다.");
+        }
     }
 
     //후기게시판 글 리스트

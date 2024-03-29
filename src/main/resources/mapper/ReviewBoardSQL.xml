@@ -6,8 +6,8 @@
 	<!--<mapper namespace="reviewBoard">-->
 	<!-- 후기게시판 글 등록 -->
 	<insert id="reviewBoardInsert" parameterType="reviewBoardVO">
-		insert into review (member_id, review_createdAt, review_updatedAt, review_views, review_title, review_content)
-		values (#{member_id}, now(), now(), #{review_views}, #{review_title}, #{review_content})
+		insert into review (member_id, review_createdAt, review_updatedAt, review_views, review_title, book_isbn, review_content)
+		values (#{member_id}, now(), now(), #{review_views}, #{review_title}, #{book_isbn}, #{review_content})
 		<selectKey keyProperty="review_id" resultType="int" order="AFTER">
 			SELECT LAST_INSERT_ID()
 		</selectKey>

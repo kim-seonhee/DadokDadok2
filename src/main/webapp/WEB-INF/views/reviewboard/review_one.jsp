@@ -286,7 +286,7 @@ function commentInsert(){
                   <a href="review_list?page=${page}&searchType=${searchType}&keyword=${keyword}" class="list_btn">목록</a>
                   <sec:authentication property="principal" var="pinfo"/>
                       <c:if test="${pinfo.member.member_id eq result.member_id}"> <%-- 로그인한 유저인 경우에만 버튼 보임 --%>
-                          <a href="/reviewboard/review_update?review_id=${result.review_id}" class="update_btn">수정</a>
+                          <a href="/reviewboard/review_update?review_id=${result.review_id}&book_isbn=${result.book_isbn}" class="update_btn">수정</a>
                           <button type="button" onclick="boardDelete(${result.review_id})" id="deleteBtn">삭제</button>
                       </c:if>
                 </div>
