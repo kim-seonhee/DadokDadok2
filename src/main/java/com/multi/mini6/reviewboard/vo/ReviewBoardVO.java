@@ -14,6 +14,7 @@ public class ReviewBoardVO {
     private String review_content;
     private int review_board_no;
     private String nickname;
+    private String book_isbn;
 
     private List<ReviewBoardAttachVO> attachList;
 
@@ -106,6 +107,14 @@ public class ReviewBoardVO {
         this.attachList = attachList;
     }
 
+    public String getBook_isbn() {
+        return book_isbn;
+    }
+
+    public void setBook_isbn(String book_isbn) {
+        this.book_isbn = book_isbn;
+    }
+
     @Override
     public String toString() {
         return "ReviewBoardVO{" +
@@ -119,6 +128,7 @@ public class ReviewBoardVO {
                 ", review_content='" + review_content + '\'' +
                 ", review_board_no=" + review_board_no +
                 ", nickname='" + nickname + '\'' +
+                ", book_isbn='" + book_isbn + '\'' +
                 ", attachList=" + attachList +
                 '}';
     }

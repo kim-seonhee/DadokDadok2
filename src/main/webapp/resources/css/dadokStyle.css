@@ -281,3 +281,24 @@ ul, ol {list-style: none;}
  .rv_insert .preview_close button { background: transparent; border: none; }
  .rv_insert .btn_box { display: flex; margin: 50px 0;  justify-content: center; }
  .rv_insert .btn_box a { margin-left: 10px; color: #fafafa; }
+
+
+
+
+/*후기게시판 - isbn */
+  .insert_form .isbn_row input { width: calc(100% - 80px - 80px - 10px); margin-right: 10px;}
+  .insert_form .isbn_row button{ width: 80px; padding: 0; background: #0a58ca; border: 1px solid #0a58ca; color: #fafafa;  border-radius: 3px; cursor: pointer; }
+  .insert_form .isbn_row button:hover { background: transparent; color:  #0a58ca; }
+  /* 모달창*/
+  .isbn_modal .modal-body .search_title { display: flex; height: 38px; }
+  .isbn_modal .modal-body .search_title input { width: calc(100% - 80px - 10px); margin-right: 10px; padding: 5px 8px; outline: none;  }
+  .isbn_modal .modal-body .search_title button { width: 80px; }
+  .isbn_modal .modal-body #search_result { padding: 10px 0; }
+  .isbn_modal .modal-body #search_result .r_row { display: flex; padding: 20px; }
+  .isbn_modal .modal-body #search_result .r_row:nth-child(1n) { background: #fafafa; }
+  .isbn_modal .modal-body #search_result .r_row:nth-child(2n) { background: #eee; }
+  .isbn_modal .modal-body #search_result .r_row .r_left { width: 80%; padding-right: 10px; }
+  .isbn_modal .modal-body #search_result .r_row .r_left p { margin: 0; }
+  .isbn_modal .modal-body #search_result .r_row .r_left #isbn_result { background: transparent; border: none; color: #0a58ca; font-weight: 900; cursor: pointer; }
+  .isbn_modal .modal-body #search_result .r_row .r_right { width: 20%; }
+  .isbn_modal .modal-body #search_result .r_row .r_right img{ width: 100%; }
