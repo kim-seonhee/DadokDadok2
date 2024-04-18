@@ -151,7 +151,7 @@
 	</select>
 
 	<!--첨부파일 이름으로 찾기 -->
-	<select id="findByFileName" resultType="reviewBoardAttachVO">
+	<select id="reviewFindByFileName" resultType="reviewBoardAttachVO">
 		select review_file_name from review_attach where review_file_name LIKE CONCAT('%', #{fileName})
 	</select>
 
